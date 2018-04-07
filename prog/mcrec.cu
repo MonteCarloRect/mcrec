@@ -5,11 +5,11 @@
 #define BUFFER 255
 
 
-int find_maximum(int a[], int n) {
-    int max = a[0];
-    for (int i = 1; i < n; i++) {
-        if (a[i] > max) {
-            max = a[i];
+int find_maximum(const int array[], int length) {
+    int max = array[0];
+    for (int i = 1; i < length; i++) {
+        if (array[i] > max) {
+            max = array[i];
         }
     }
     return max;
