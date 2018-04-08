@@ -23,9 +23,9 @@ int get_integer_from_string(const char array[], int begin, int length) {
     return atoi(array_section);
 }
 
-void get_string(char a[], char out[], int begin, int length) {
+void get_string_section(const char string_input[], char string_output[], int begin, int length) {
     for (int i = 0; i < length; i++) {
-        out[i] = a[begin + i];
+        string_output[i] = string_input[begin + i];
     }
 }
 
@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
     //functions
     int find_maximum(int a[], int n);
     int get_integer_from_string(char a[], int n, int begin, int length);
-    void get_string(char a[], char out[], int begin, int length);
+    void get_string_section(char a[], char out[], int begin, int length);
     float get_float(char a[], int begin, int length);
 
     //----------------GET DEVICE PROPERTIES
@@ -175,9 +175,9 @@ int main(int argc, char *argv[]) {
         fgets(tempString, BUFFER, fileId);
         for (int j = 0; j < subAtomNum[i]; j++) {
             fgets(tempString2, BUFFER, fileId);    //read string to buffer
-            get_string(tempString2, subName[i], 5, 5);    //parse string
+            get_string_section(tempString2, subName[i], 5, 5);    //parse string
             printf("sub %s\n", subName[i]);
-            get_string(tempString2, subAtomName[i][j], 10, 5);
+            get_string_section(tempString2, subAtomName[i][j], 10, 5);
             printf("atom %s\n", subAtomName[i][j]);
             subAtomCoord[i][j].x = get_float(tempString2, 20, 8);
             subAtomCoord[i][j].y = get_float(tempString2, 28, 8);
