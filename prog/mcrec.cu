@@ -15,18 +15,16 @@ int find_maximum(const int array[], int length) {
     return max;
 }
 
-int get_integer_from_string(const char array[], int begin, int length) {
-    char array_section[length];
-    for (int i = 0; i < length; i++) {
-        array_section[i] = array[begin + i];
-    }
-    return atoi(array_section);
-}
-
 void get_string_section(const char string_input[], char string_output[], int begin, int length) {
     for (int i = 0; i < length; i++) {
         string_output[i] = string_input[begin + i];
     }
+}
+
+int get_integer_from_string(const char line[], int begin, int length) {
+    char line_section[length];
+    get_string_section(line, line_section, begin, length);
+    return atoi(line_section);
 }
 
 float get_float(char a[], int begin, int length) {
