@@ -27,12 +27,10 @@ int get_integer_from_string(const char line[], int begin, int length) {
     return atoi(line_section);
 }
 
-float get_float(char a[], int begin, int length) {
-    char b[length];
-    for (int i = 0; i < length; i++) {
-        b[i] = a[begin + i];
-    }
-    return atof(b);
+float get_float_from_string(char line[], int begin, int length) {
+    char line_section[length];
+    get_string_section(line, line_section, begin, length);
+    return atof(line_section);
 }
 
 int main(int argc, char *argv[]) {
