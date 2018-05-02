@@ -67,6 +67,17 @@ int main(int argc, char *argv[]) {
     char *tempString3, tempString4;
 
 
+    // parsing command line arguments
+    char setup_file_link[200];
+    char topology_file_link[200];
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i - 1], "-f") == 0) {
+            strcpy(setup_file_link, argv[i]);
+        } else if (strcmp(argv[i - 1], "-s") == 0) {
+            strcpy(topology_file_link, argv[i]);
+        }
+    }
+
 
     //init vaaraibles
     int *initMolNum;
@@ -98,7 +109,7 @@ int main(int argc, char *argv[]) {
     }
 
     //------------------READ INPUT DATA
-    fileId = fopen("data.mcr", "r");
+    fileId = fopen("setup_file_link", "r");
     fscanf(fileId, "%d", &subNum);
 //read molecules data
     printf("Substance number: %d\n", subNum);
