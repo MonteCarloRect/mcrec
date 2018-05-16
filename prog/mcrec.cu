@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define SUBNUMMAX 10
 #define BUFFER 255
+#define INSTIMES 10
+#define MAXMOL 5000
 
 
 int find_maximum(int a[], int n) {
@@ -63,6 +66,7 @@ int main (int argc, char * argv[]){
 	//input flow
 	int flowNum;	//flow numbers
 	float** flowX;	//flow mole fractions
+	int** flowNiIns;	//flow number of inserted molecules per cycle
 	float* flowT;	//flow temperatures
 	float* flowN;	//flow number density
 	int* flowIns;	//inserting molecules per
@@ -75,8 +79,26 @@ int main (int argc, char * argv[]){
 
 
 	
-	//init vaaraibles
+	//init varaibles
 	int* initMolNum;
+	float3** initMolCoord_c;
+	float3*** inttAtomCoord_c;
+	int latice;
+	int** initMolType_c;
+	int** initBoxType_c;
+	float3* tempCell;	//initial coordinates of 
+	int* tempBusy;	//
+	float Lbox;	//liquid cell length
+	float Vbox;	//vapor cell length
+	int id,id2;	//id of initial cell
+	float liqFrac;
+	int** initMolInsV;
+	int** initMolInsL;
+	int** initMolLiqList;	//list of molecules in liquid phase at plate
+	int** initMolVapList;	//list of molecules in vapor phase at plate
+	int* initMolLiqNum;	//numbers of molecules in liquid phase at plate
+	int* initMolVapNum;	//number of molecules in vapor phase at plate
+
 
 	//functions
 	int find_maximum(int a[], int n);
@@ -84,6 +106,8 @@ int main (int argc, char * argv[]){
 	void get_string(char a[], char out[], int begin, int length);
 	float get_float(char a[], int begin, int length);
 	
+	//random generator
+	srand(time(NULL));
 	//----------------GET DEVICE PROPERTIES
 	currentError=cudaGetDeviceCount(&deviceCount);
 	if (currentError!=cudaSuccess){
@@ -130,10 +154,23 @@ int main (int argc, char * argv[]){
 		for(int i=0;i<flowNum;i++){
 			flowX[i]=(float*)malloc(subNum*sizeof(float));
 		}
+		flowNiIns=(int**) malloc(flowNum*sizeof(int*));
+		for(int i=0; i<flowNum;i++){
+			flowNiIns[i]=(int*) malloc(subNum*sizeof(int));
+		}
 		for(int i=0;i<flowNum;i++){
 			for(int j=0;j<subNum;j++){
 			fscanf(fileId,"%f", &flowX[i][j]);
 			}
+		}
+		//calculate numbers of initial molecules
+		for(int i=0;i<flowNum;i++){
+			tempInt=0;
+			for(int j=0;j<subNum-1;j++){
+				flowNiIns[i][j]=floor(flowX[i][j]*flowIns[i]);
+				tempInt+=flowNiIns[i][j];
+			}
+			flowNiIns[i][subNum-1]=flowIns[i]-tempInt;
 		}
 	fclose(fileId);
 //--------------------READ GRO FILES
@@ -185,7 +222,7 @@ int main (int argc, char * argv[]){
 			subAtomCoord[i][j].x=get_float(tempString2,20,8);
 			subAtomCoord[i][j].y=get_float(tempString2,28,8);
 			subAtomCoord[i][j].z=get_float(tempString2,36,8);
-			printf("x %f y %f z %f  \n",subAtomCoord[i][j].x,subAtomCoord[i][j].y,subAtomCoord[i][j].z);	
+			printf("x %f y %f z %f  \n",subAtomCoord[i][j].x,subAtomCoord[i][j].y,subAtomCoord[i][j].z);
 		}
 		fclose(fileId);
 	}
@@ -207,22 +244,150 @@ int main (int argc, char * argv[]){
 
 	//------------------INITIAL SIMULATION
 	initMolNum=(int*)malloc(flowNum*sizeof(int));
-	for (int i=0;i<flowNum;i++){
-		initMolNum[i]=flowIns[i]*10;
-		
+	initMolCoord_c=(float3**)malloc(flowNum*sizeof(float3*));
+	initMolType_c=(int**)malloc(flowNum*sizeof(int*));
+	initMolInsV=(int**)malloc(flowNum*sizeof(int*));
+	initMolInsL=(int**)malloc(flowNum*sizeof(int*));
+	initMolLiqList=(int**)malloc(flowNum*sizeof(int*));
+	initMolVapList=(int**)malloc(flowNum*sizeof(int*));
+	initMolLiqNum=(int*)malloc(flowNum*sizeof(int));
+	initMolVapNum=(int*)malloc(flowNum*sizeof(int));
+	//allocate initial arrays
+	for(int i=0;i<flowNum;i++){
+		initMolNum[i]=flowIns[i]*INSTIMES;	//numbers of molecules in initial plates 10 times ladger input flow
+		initMolCoord_c[i]=(float3*)malloc(initMolNum[i]*sizeof(float3));	//allocate atom coords
+		initMolType_c[i]=(int*)malloc(initMolNum[i]*sizeof(int));
+		initMolInsV[i]=(int*)malloc(subNum*sizeof(int));
+		initMolInsL[i]=(int*)malloc(subNum*sizeof(int));
+		initMolLiqList[i]=(int*)malloc(initMolNum[i]*sizeof(int));
+		initMolVapList[i]=(int*)malloc(initMolNum[i]*sizeof(int));
+		for(int j=0;j<initMolNum[i];j++){
+			initMolType_c[i][j]=-1;	//initial free space
+		}
 	}
+	for (int i=0;i<flowNum;i++){
+		//Insert in liquid box
+		liqFrac=0.8;
+		for(int j=0;j<subNum;j++){	//get liquid molecules per cell
+			initMolInsL[i][j]=ceil(flowNiIns[i][j]*INSTIMES*liqFrac);
+			initMolInsV[i][j]=flowNiIns[i][j]*INSTIMES-initMolInsL[i][j];
+		}
+		latice=ceil(pow(initMolNum[i]*liqFrac,1.0/3.0))+1;	//
+		//insert in liquid
+		printf("numbers %d\n",latice);
+		printf("nmol %d \n",initMolNum[i]);
+		tempCell=(float3*)malloc(latice*latice*latice*sizeof(float3));	//temporally cell array
+		tempBusy=(int*)malloc(latice*latice*latice*sizeof(int));
+		Lbox=10.0;	//написать выбор размеров начальных боксов
+		id=0;
+		for(int j=0;j<latice;j++){
+			for(int k=0;k<latice;k++){
+				for(int l=0;l<latice;l++){
+					tempCell[id].x=(float)j*Lbox/(float)latice;
+					tempCell[id].y=(float)k*Lbox/(float)latice;
+					tempCell[id].z=(float)l*Lbox/(float)latice;
+					tempBusy[id]=-1;
+					id++;
+				}
+			}
+		}
+		id=0;
+		for(int j=0;j<subNum;j++){
+			tempInt=0;
+			while(tempInt<initMolInsL[i][j]){
+				tempInt2=rand() % (latice*latice*latice);
+//				printf("random %d busy %d x %f \n",tempInt2,tempBusy[tempInt2],tempCell[tempInt2].x);
+//				tempInt++;
+				if(tempBusy[tempInt2]==-1){
+//					initMolType_c[i]
+					initMolType_c[i][id]=j;
+					initMolCoord_c[i][id]=tempCell[tempInt2];
+					initMolLiqList[i][id]=id;
+					//liquid
+					
+					tempBusy[tempInt2]=1;
+					tempInt++;
+//					printf("%d sub %d id %d\n",id,j,initMolNum[i]);
+//					printf(" x %f xl %f\n",initMolCoord_c[j][id].x,tempCell[tempInt2].x);
+					id++;
+				}
+			}
+		}
+		free(tempCell);
+		free(tempBusy);
+		id2=id; //get the last element index
+		//insert molecules in vapor=========================================
+		latice=ceil(pow(initMolNum[i]*(1.0-liqFrac),1.0/3.0))+1;	//
+		//insert in liquid
+//		printf("numbers %d\n",latice);
+//		printf("nmol %d \n",initMolNum[i]);
+		tempCell=(float3*)malloc(latice*latice*latice*sizeof(float3));	//temporally cell array
+		tempBusy=(int*)malloc(latice*latice*latice*sizeof(int));
+		Lbox=40.0;	//написать выбор размеров начальных боксов
+		id=0;
+		for(int j=0;j<latice;j++){
+			for(int k=0;k<latice;k++){
+				for(int l=0;l<latice;l++){
+					tempCell[id].x=(float)j*Lbox/(float)latice;
+					tempCell[id].y=(float)k*Lbox/(float)latice;
+					tempCell[id].z=(float)l*Lbox/(float)latice;
+					tempBusy[id]=-1;
+					id++;
+				}
+			}
+		}
+		initMolLiqNum[i]=id;	//numbers of molecules in liquid phase
+		id=id2;
+		id2=0;
+		for(int j=0;j<subNum;j++){
+			tempInt=0;
+			while(tempInt<initMolInsV[i][j]){
+				tempInt2=rand() % (latice*latice*latice);
+//				printf("random %d busy %d x %f \n",tempInt2,tempBusy[tempInt2],tempCell[tempInt2].x);
+//				tempInt++;
+				if(tempBusy[tempInt2]==-1){
+//					initMolType_c[i]
+					initMolType_c[i][id]=j;	//set type of molecule
+					initMolCoord_c[i][id]=tempCell[tempInt2];	//set coordinates from cubic latice
+					initMolVapList[i][id2]=id;
+					//vapor molecules list
+						
+					tempBusy[tempInt2]=1;
+					tempInt++;
+//					printf("%d sub %d id %d\n",id,j,initMolNum[i]);
+//					printf(" x %f xl %f\n",initMolCoord_c[j][id].x,tempCell[tempInt2].x);
+					id++;
+					id2++;
+				}
+			}
+		}
+		initMolVapNum[i]=id2;
+		free(tempCell);
+		free(tempBusy);
+	}
+	//for initial calculates on first device
 	
-
+	
+	
 	
 
 	//------------------FREE Arrays
-	for(int i=0;i<flowNum;i++){
-		free(flowX[i]);
-	}
-	free(flowX);
+//free
+	
 	free(flowT);
 	free(flowN);
-	free(pd);	//free properties of devices
+	free(pd);
+
+	for(int i=0;i<flowNum;i++){
+		free(flowX[i]);
+		
+		//initial arrays
+		free(initMolCoord_c[i]);
+	}
+	free(flowX);
+
+	free(initMolCoord_c);
+	//free properties of devices
 
 
 //	priflowNlowT("Device count %d \n", deviceCount);
