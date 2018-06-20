@@ -1,13 +1,27 @@
-cmake_minimum_required (VERSION 3.0)
-project (MCrec)
-find_package(CUDA)
+cmake_minimum_required(VERSION 2.8)
+project(mcrec)
+find_package(CUDA QUIET REQUIRED)
 
-cuda_add_executable(mcrec mcrec.cu)
+
+
+include_directories(
+    initial
+)
+
+cuda_add_executable(
+    mcrec
+    global.h
+    mcrec.h
+    initial.h
+    mcrec.cu
+    initial/device_prop.cu
+    initial/read_options.cu
+    initial/read_gro.cu
+    write/log.cu
+)
 
 set_property(TARGET mcrec PROPERTY CUDA_SEPARABLE_COMPILATION ON)
 
-# The version number.
-set (Tutorial_VERSION_MAJOR 0)
-set (Tutorial_VERSION_MINOR 0)
-
-
+#target_link_libraries(
+#    hellocuda
+#) cmake .. -DCMAKE_C_COMPILER=/usr/bin/gcc-6
