@@ -33,10 +33,10 @@ extern struct flows{
     float** xa;  //atom coords
     float** ya;
     float** za;
-    int vaporNum;   //molecules in vapor phase
-    int liquidNum;  //molecules in liquid phase
-    int* vaporList; //list of molecules in vapor phase
-    int* liquidList; //list of molecules in liquid phase
+//    int vaporNum;   //molecules in vapor phase
+//    int liquidNum;  //molecules in liquid phase
+//    int* vaporList; //list of molecules in vapor phase
+//    int* liquidList; //list of molecules in liquid phase
 } initialFlows;
 
 extern int deviceCount;
