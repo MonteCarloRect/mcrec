@@ -5,6 +5,7 @@
 int read_options(options &config){
     //varaibles
     FILE* fileId;
+    char enStr[BUFFER];
     
     fileId = fopen("data.mcr", "r");
     fscanf(fileId, "%d", &config.subNum);
@@ -14,10 +15,20 @@ int read_options(options &config){
     }
 //read flow data
     fscanf(fileId, "%d", &config.flowNum);
+    config.flowEns = (int *) malloc(config.flowNum * sizeof(int));
     config.flowT = (float *) malloc(config.flowNum * sizeof(float));
     config.flowN = (float *) malloc(config.flowNum * sizeof(float));
     config.flowP = (float *) malloc(config.flowNum * sizeof(float));
     config.flowIns = (int *) malloc(config.flowNum * sizeof(int));
+    //read ensambles
+    for (int i = 0; i < config.flowNum; i++){
+        fscanf(fileId,"%s",&enStr);
+//        printf("test|%s|\n",enStr);
+        if(strcmp(enStr,"nvt")==0){
+            config.flowEns[i]=NVT;
+            printf("ensamble %d\n",config.flowEns[i]);
+        }
+    }
     for (int i = 0; i < config.flowNum; i++) {
         fscanf(fileId, "%f", &config.flowT[i]);
     }

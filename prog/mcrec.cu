@@ -18,6 +18,9 @@ int main (int argc, char * argv[]){
     //read gro data for each molecules
     initMol = (molecules *) malloc(config.subNum * sizeof(molecules));
     read_init_gro(config, initMol);
+    //create initial simulation
+    initial_flows(config, initFlows);
+    printf("\n test %d \n", initFlows[0].molNum);
 //close log file
     fclose(logFile);
 
