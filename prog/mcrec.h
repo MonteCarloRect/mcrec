@@ -71,6 +71,12 @@ typedef struct{
 } potentialParam;
 
 
+//    int vaporNum;   //molecules in vapor phase
+//    int liquidNum;  //molecules in liquid phase
+//    int* vaporList; //list of molecules in vapor phase
+//    int* liquidList; //list of molecules in liquid phase
+//} initialFlows;
+
 extern int deviceCount;
 extern cudaDeviceProp* deviceProp;  //array of device properties
 
