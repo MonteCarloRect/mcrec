@@ -1,0 +1,98 @@
+[ defaults ]
+1    2 no    1.00000   1.00000
+[ atomtypes ]
+Si    28.0000    0.9000 A    0.38264   1.25700
+C2   14.0000   -0.2250 A    0.39500   0.38244
+O    16.0000   -0.4500 A    0.31181   0.62850
+CE1    15.0110    0.0000 A    0.36072   0.99898
+CE2    14.0110    0.2526 A    0.34612   0.71746
+OE1    15.9994   -0.6971 A    0.31496   0.70717
+HE1     1.0080    0.4415 A    0.01000   0.00000
+OW    15.9994    0.0000 A    0.31589   0.77490
+HW     1.0080    0.5564 A    0.01000   0.00000
+MW     0.0000   -1.1128 D    0.01000   0.00000
+Em     111.18    1.0   A      1.4675    0.4899
+Bf     86.792   -1.0   A      1.4675    0.4899
+[ bondtypes ]
+CE1    CE2      1        0.19842   500000.00000
+CE2    OE1      1        0.17158   500000.00000
+OE1    HE1      1        0.09505   500000.00000
+OW     HW      1        0.09572   500000.00000
+OW     MW      1        0.01546   500000.00000
+[ angletypes ]
+CE1    CE2    OE1      1  90.95000 500.00000
+CE2    OE1    HE1      1 106.36800 500.00000
+HW     OW     HW       1 104.52000 500.00000
+MW    OW    HW       1  52.26000 500.00000
+[ dihedraltypes ]
+CE1    CE2    OE1    HE1      5   5.00000   0.00000   0.00000   0.00000
+
+[ moleculetype ]
+ETH  3
+[ atoms ]
+1  CE1      1 ETH CE1    1   0.00000  15.01100
+2  CE2      1 ETH CE2    1   0.25560  14.01100
+3  OE1      1 ETH OE1    1  -0.69711  15.99940
+4  HE1      1 ETH HE1    1   0.44151   1.00800
+[ bonds ]
+1    2    1
+2    3    1
+3    4    1
+[ pairs ]
+[ angles ]
+1    2    3    1
+2    3    4    1
+[ dihedrals ]
+1    2    3    4    5
+[ exclusions ]
+[ position_restraints ]
+[ constraints ]
+
+[ moleculetype ]
+WAT  3
+[ atoms ]
+1 OW     1 WAT  OW     1   0.00000  15.99940
+2 HW     1 WAT  HW     1   0.55640   1.00800
+3 HW     1 WAT  HW     1   0.55640   1.00800
+4 MW     1 WAT  MW     1  -1.11280   0.00000
+[ bonds ]
+1    2    1
+1    3    1
+[ pairs ]
+[ angles ]
+2    1    3    1
+[ dihedrals ]
+[ exclusions ]
+1    2    3    4
+2    1    3    4
+3    1    2    4
+4    1    2    3
+[ virtual_sites3 ]
+4    1    2    3    1    0.131937768    0.131937768
+
+[ moleculetype ]
+Emi  3
+[ atoms ]
+1 Em     1 Emi  Em     1   1.00000  111.18
+[ bonds ]
+[ pairs ]
+[ angles ]
+[ dihedrals ]
+[ exclusions ]
+
+[ moleculetype ]
+Bf4  3
+[ atoms ]
+1 Bf     1 Bf4  Bf     1   -1.00000  86.792
+[ bonds ]
+[ pairs ]
+[ angles ]
+[ dihedrals ]
+[ exclusions ]
+
+
+[ system ]
+generateg with membcreat v5 in water
+[ molecules ]
+     ETH    1000
+     WAT    1000

@@ -1,7 +1,12 @@
 //varaibles
+//#include "mcrec.h"
+
 options config;
 int deviceCount;
 cudaDeviceProp* deviceProp;
-molecules* initMol;	//inserted molecules
+molecules* initMol; //inserted molecules
 FILE* logFile;
-flows* initFlows;
+singleBox* gpuSingleBox;
+singleBox* initFlows;
+potentialParam* allParams;
+int paramsLines;

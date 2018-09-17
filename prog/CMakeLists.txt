@@ -19,7 +19,9 @@ cuda_add_executable(
     initial/read_options.cu
     initial/read_gro.cu
     initial/initial_flows.cu
+    initial/free_arrays.cu
     write/log.cu
+    initial/read_top.cu
 )
 #set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -o3")
 #set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -lm")
