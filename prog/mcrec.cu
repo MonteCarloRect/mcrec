@@ -25,7 +25,7 @@ int main (int argc, char * argv[]){
     }
     printf("number of top lines %d\n",paramsLines);
     //create initial simulation
-    initial_flows(config, initFlows,initMol,gpuSingleBox);
+    initial_flows(config, initFlows,initMol,gpuSingleBox,paramsLines,allParams,gpuParams);
     printf("\n test %d \n", initFlows[0].molNum);
     //put data to device
 //    data_to_device(initFlows,gpuSingleBox,config);

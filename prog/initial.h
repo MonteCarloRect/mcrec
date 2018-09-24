@@ -10,3 +10,4 @@ singleBox* gpuSingleBox;
 singleBox* initFlows;
 potentialParam* allParams;
 int paramsLines;
+potentialParam* gpuParams;

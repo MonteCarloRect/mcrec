@@ -17,6 +17,7 @@ extern struct options{
 
 extern struct molecules{
     int atomNum;
+    char** aName;
     float* x;
     float* y;
     float* z;
@@ -92,8 +93,9 @@ int write_prop_log(int deviceCount, cudaDeviceProp* deviceProp,FILE* logFile);
 int write_config_log(options con,FILE* logFile);
 
 //flows
-int initial_flows(options config, singleBox* &initFlows,molecules* initMol, singleBox* &gpuSingleBox);
+int initial_flows(options config, singleBox* &initFlows,molecules* initMol, singleBox* &gpuSingleBox, int lines, potentialParam* allParams, potentialParam* gpuParams);
 int freeAll(singleBox* &gpuSingleBox,singleBox* &initFlows,options config);
 int read_top(potentialParam* &allParams,int &lines);
 char* remove_space(char* input);
+int text_left(char* in, char* &out);
 #endif

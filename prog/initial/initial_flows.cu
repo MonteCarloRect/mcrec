@@ -5,7 +5,7 @@
 #include "../mcrec.h"
 #include <time.h>
 
-int initial_flows(options config, singleBox* &initFlows,molecules* initMol, singleBox* &gpuSingleBox){
+int initial_flows(options config, singleBox* &initFlows,molecules* initMol, singleBox* &gpuSingleBox, int lines, potentialParam* allParams, potentialParam* gpuParams){
     float* l_x; //latice coords
     float* l_y;
     float* l_z;
@@ -18,6 +18,10 @@ int initial_flows(options config, singleBox* &initFlows,molecules* initMol, sing
     int moleculePerBox;
     int randMol;
     int l_type;
+    int* linesList;
+    int linesEnd;
+    int checked;
+    potentialParam* hostParam;
     
     moleculePerBox=2000;
     srand(time(0));
@@ -106,12 +110,40 @@ int initial_flows(options config, singleBox* &initFlows,molecules* initMol, sing
     cudaMalloc(&gpuSingleBox, config.flowNum*sizeof(singleBox));
     cudaMemcpy(gpuSingleBox,initFlows,config.flowNum*sizeof(singleBox),cudaMemcpyHostToDevice);
     
+//    //check used atoms
+//    for(int i=0;i<config.subNum;i++){
+//        for(int j=0;j<initMol[i].atomNum;j++){
+//            
+//        }
+//    }
+    linesList=(int*) malloc (lines*sizeof(int));
     //check used atoms
-    for(int i=0;i<config.subNum;i++){
-        for(int j=0;j<initMol[i].atomNum;j++){
-            
+    id=0;
+    for(int i=0;i<lines;i++){
+        checked=0;
+        for(int sub=0;sub<config.subNum;sub++){
+            for(int at=0;at<initMol[sub].atomNum;at++){
+//                if(allParams[i].aName==initMol[sub].atomNum)
+                printf("|%s|%s|%d|%d\n",allParams[i].aName,initMol[sub].aName[at], strcmp(initMol[sub].aName[at],allParams[i].aName),strcmp(allParams[i].aName,initMol[sub].aName[at]));
+                if(strcmp(initMol[sub].aName[at],allParams[i].aName)==0 || abs(strcmp(initMol[sub].aName[at],allParams[i].aName))==127){
+                    printf("i %d sub %d a %d %s  %s \n",i,sub, at, allParams[i].aName,initMol[sub].aName[at]);
+                    //add line from top file to gpu
+                    checked=1;
+                }
+            }
+        }
+        if(checked==1){
+            linesList[id]=i;
+            id++;
         }
     }
+    linesEnd=id-1;
+    //malloc parameters
+    cudaMalloc(&gpuParams,linesEnd*sizeof(potentialParam));
+    //host parameters
+    
+//    cudaMemcpy(gpuParams,)
+    
 //        //get numbers of molecules of each substance
 //        sum=0;
 //        for(int s_i=0; s_i<config.subNum-1;s_i++){
@@ -142,3 +174,5 @@ int initial_flows(options config, singleBox* &initFlows,molecules* initMol, sing
         
     return 1;
 }
+
+

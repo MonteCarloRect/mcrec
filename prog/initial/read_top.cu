@@ -55,9 +55,15 @@ potentialParam tempParams[BUFFER];
                                 //copy first 5 char
                                 strcpy(tempParams[atomLines].aName,"11111");    //fill 
                                 for(int f5=0;f5<5;f5++){
-                                    tempParams[atomLines].aName[f5]=tempString2[f5];
+//                                    printf("<%c>",tempString2[f5]);
+                                    if(tempString2[f5]!='\0'){
+                                        tempParams[atomLines].aName[f5]=tempString2[f5];
+                                    }
+                                    else{
+                                        tempParams[atomLines].aName[f5]=' ';
+                                    }
                                 }
-                                printf("aname %s %d\n",tempParams[atomLines].aName,id);
+                                printf("aname |%s| %d\n",tempParams[atomLines].aName,id);
                             }
                             if(wordNum==1){
                                 tempParams[atomLines].mass=strtof(tempString2,&pEnd);
