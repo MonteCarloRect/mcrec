@@ -7,6 +7,10 @@ int read_options(options &config){
     FILE* fileId;
     char enStr[BUFFER];
     
+    //------------add read from file soon
+    config.mixRule=LB;
+    //
+    
     fileId = fopen("data.mcr", "r");
     fscanf(fileId, "%d", &config.subNum);
     printf("Substance number: %d\n", config.subNum);

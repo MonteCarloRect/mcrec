@@ -22,6 +22,7 @@ cuda_add_executable(
     initial/free_arrays.cu
     write/log.cu
     initial/read_top.cu
+    initial/single_box.cu
 )
 #set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -o3")
 #set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -lm")

@@ -4,8 +4,9 @@
 #include <time.h>
 #include "../mcrec.h"
 #include <time.h>
+//#include "../initial.h"
 
-int initial_flows(options config, singleBox* &initFlows,molecules* initMol, singleBox* &gpuSingleBox, int lines, potentialParam* allParams, potentialParam* gpuParams){
+int initial_flows(options &config, singleBox* &initFlows,molecules* initMol, singleBox* &gpuSingleBox, int lines, potentialParam* allParams, potentialParam* gpuParams, potentialParam* hostParams, mixParam** gpuMixParams, mixParam** hostMixParams,cudaDeviceProp* deviceProp){
     float* l_x; //latice coords
     float* l_y;
     float* l_z;
@@ -21,11 +22,14 @@ int initial_flows(options config, singleBox* &initFlows,molecules* initMol, sing
     int* linesList;
     int linesEnd;
     int checked;
-    potentialParam* hostParam;
+    //int sizey;
     
-    moleculePerBox=2000;
+    config.singleXDim=ceil(deviceProp[0].maxThreadsPerBlock);
+    config.singleYDim=ceil(2000/config.singleXDim)+1;
+    moleculePerBox=config.singleYDim*config.singleYDim;
     srand(time(0));
-    
+//    printf(" ydim  %d \n", config.singleYDim);
+//    getchar();
     //create arrays
     initFlows=(singleBox*) malloc(config.flowNum * sizeof(singleBox));
     srand(time(0));
@@ -93,12 +97,21 @@ int initial_flows(options config, singleBox* &initFlows,molecules* initMol, sing
         initFlows[i].xa=(float**) malloc(initFlows[i].molNum*sizeof(float*));
         initFlows[i].ya=(float**) malloc(initFlows[i].molNum*sizeof(float*));
         initFlows[i].za=(float**) malloc(initFlows[i].molNum*sizeof(float*));
+        initFlows[i].aType=(int**) malloc(initFlows[i].molNum*sizeof(int*));
+        initFlows[i].aNum=(int*)malloc(initFlows[i].molNum*sizeof(int));
+        printf("num of mol %d\n", initFlows[i].molNum);
         //set atoms to places
         for(int j=0; j<initFlows[i].molNum;j++){    //check all molecules
+            //
+            //
+            
             l_type=initFlows[i].type[j];  //get molecules type
+            initFlows[i].aNum[j]=initMol[l_type].atomNum;
             initFlows[i].xa[j]=(float*) malloc(initMol[l_type].atomNum*sizeof(float));
             initFlows[i].ya[j]=(float*) malloc(initMol[l_type].atomNum*sizeof(float));
             initFlows[i].za[j]=(float*) malloc(initMol[l_type].atomNum*sizeof(float));
+            initFlows[i].aType[j]=(int*) malloc(initMol[l_type].atomNum*sizeof(int));
+            //printf("type %d numbers of atom in molecule %d\n",l_type,initMol[l_type].atomNum);
             for(int k=0;k<initMol[l_type].atomNum;k++){
                 initFlows[i].xa[j][k]=initMol[l_type].x[k];
                 initFlows[i].ya[j][k]=initMol[l_type].y[k];
@@ -106,6 +119,7 @@ int initial_flows(options config, singleBox* &initFlows,molecules* initMol, sing
             }
         }
     }
+    //getchar();
     //data to GPU
     cudaMalloc(&gpuSingleBox, config.flowNum*sizeof(singleBox));
     cudaMemcpy(gpuSingleBox,initFlows,config.flowNum*sizeof(singleBox),cudaMemcpyHostToDevice);
@@ -124,7 +138,7 @@ int initial_flows(options config, singleBox* &initFlows,molecules* initMol, sing
         for(int sub=0;sub<config.subNum;sub++){
             for(int at=0;at<initMol[sub].atomNum;at++){
 //                if(allParams[i].aName==initMol[sub].atomNum)
-                printf("|%s|%s|%d|%d\n",allParams[i].aName,initMol[sub].aName[at], strcmp(initMol[sub].aName[at],allParams[i].aName),strcmp(allParams[i].aName,initMol[sub].aName[at]));
+//                printf("|%s|%s|%d|%d\n",allParams[i].aName,initMol[sub].aName[at], strcmp(initMol[sub].aName[at],allParams[i].aName),strcmp(allParams[i].aName,initMol[sub].aName[at]));
                 if(strcmp(initMol[sub].aName[at],allParams[i].aName)==0 || abs(strcmp(initMol[sub].aName[at],allParams[i].aName))==127){
                     printf("i %d sub %d a %d %s  %s \n",i,sub, at, allParams[i].aName,initMol[sub].aName[at]);
                     //add line from top file to gpu
@@ -137,10 +151,56 @@ int initial_flows(options config, singleBox* &initFlows,molecules* initMol, sing
             id++;
         }
     }
-    linesEnd=id-1;
-    //malloc parameters
-    cudaMalloc(&gpuParams,linesEnd*sizeof(potentialParam));
+    linesEnd=id;
     //host parameters
+    hostParams=(potentialParam*)malloc(linesEnd*sizeof(potentialParam));
+    for(int i=0;i<linesEnd;i++){
+        hostParams[i]=allParams[linesList[i]];
+        printf("host aname %d %s\n",i, hostParams[i].aName);
+    }
+    //add mixrule
+    //mixParam hostMixParams[linesEnd][linesEnd];
+    hostMixParams = (mixParam**) malloc(linesEnd*sizeof(mixParam*));
+    for(int i=0;i<linesEnd;i++){
+        hostMixParams[i]=(mixParam*) malloc(linesEnd*sizeof(mixParam));
+        for(int j=0;j<linesEnd;j++){
+            if(config.mixRule==LB){
+                hostMixParams[i][j].sigma=0.5*(hostParams[i].sigma+hostParams[j].sigma);
+                hostMixParams[i][j].epsilon=sqrt(hostParams[i].epsilon*hostParams[j].epsilon);
+                hostMixParams[i][j].alpha=0.0;
+                hostMixParams[i][j].charge=hostParams[i].charge*hostParams[j].charge;
+            }
+        }
+    }
+    //add atom types
+    for(int i=0;i<config.flowNum;i++){  //flow
+        for(int j=0;j<initFlows[i].molNum;j++){ //molecule
+            
+            for(int k=0;k<initFlows[i].aNum[j];k++){    //atom
+                //get curent atom name
+                //initMol[initFlows[i].type[j]].aName[k]
+                for(int chk=0;chk<linesEnd;chk++){  //check from list
+                    if(strcmp(initMol[initFlows[i].type[j]].aName[k],hostParams[chk].aName)==0 || abs(strcmp(initMol[initFlows[i].type[j]].aName[k],hostParams[chk].aName))==127 ){
+                        
+                    }
+                }
+                
+            }
+            
+        }
+        
+    }
+    
+    //malloc gpu mix params
+    cudaMalloc(&gpuMixParams,linesEnd*linesEnd*sizeof(mixParam));
+    cudaMemcpy(gpuMixParams,hostMixParams,linesEnd*linesEnd*sizeof(mixParam),cudaMemcpyHostToDevice);
+//    for(int i=0;i<linesEnd;i++){
+//        cudaMalloc(&gpuMixParams[i],linesEnd*sizeof(mixParam));
+//    }
+    
+    //malloc parameters
+//    cudaMalloc(&gpuParams,linesEnd*sizeof(potentialParam));
+//    cudaMemcpy(gpuParams,hostParams,linesEnd*sizeof(potentialParam),cudaMemcpyHostToDevice);
     
 //    cudaMemcpy(gpuParams,)
     

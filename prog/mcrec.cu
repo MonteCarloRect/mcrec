@@ -25,12 +25,16 @@ int main (int argc, char * argv[]){
     }
     printf("number of top lines %d\n",paramsLines);
     //create initial simulation
-    initial_flows(config, initFlows,initMol,gpuSingleBox,paramsLines,allParams,gpuParams);
+    initial_flows(config, initFlows,initMol,gpuSingleBox,paramsLines,allParams,gpuParams,hostParams, gpuMixParams, hostMixParams,deviceProp);
     printf("\n test %d \n", initFlows[0].molNum);
     //put data to device
 //    data_to_device(initFlows,gpuSingleBox,config);
     
-    printf("\n test2 %d \n", initFlows[0].molNum);
+    printf("\n test2 %d %d \n", initFlows[0].molNum, config.flowNum);
+    ///calculate initial flows
+    dim3 singleThread(config.singleXDim);
+    printf(" grid %d  - %d \n", singleThread.x, singleThread.y);
+    single_calc<<<config.flowNum,singleThread>>>(gpuSingleBox,gpuParams,config.singleYDim);
 //close log file
     freeAll(gpuSingleBox,initFlows,config);
     fclose(logFile);

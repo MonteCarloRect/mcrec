@@ -11,3 +11,6 @@ singleBox* initFlows;
 potentialParam* allParams;
 int paramsLines;
 potentialParam* gpuParams;
+potentialParam* hostParams;
+mixParam** gpuMixParams;
+mixParam** hostMixParams;

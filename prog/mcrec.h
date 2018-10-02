@@ -1,6 +1,8 @@
 #ifndef MC_H
 #define MC_H
 #include <cuda_runtime.h>
+#include <cuda.h>
+#include <vector_types.h>
 #include "global.h"
 
 extern struct options{
@@ -13,6 +15,9 @@ extern struct options{
     float* flowP;   //flow pressure [bar]
     int* flowIns;
     float** flowX;
+    int mixRule;    //mixrule
+    int singleXDim; //y dimension of threads
+    int singleYDim; //y dimension of threads
 } config;
 
 extern struct molecules{
@@ -57,6 +62,8 @@ typedef struct{
     float* xm;  //coordinats of molecules
     float* ym;
     float* zm;
+    int* aNum;  //atom numbers
+    int** aType;    //atomtype
     float** xa; //coordinats of atoms
     float** ya;
     float** za;
@@ -70,6 +77,13 @@ typedef struct{
     float mass;
     float charge;
 } potentialParam;
+
+typedef struct{
+    float sigma;
+    float epsilon;
+    float alpha;
+    float charge;
+} mixParam;
 
 
 //    int vaporNum;   //molecules in vapor phase
@@ -93,9 +107,12 @@ int write_prop_log(int deviceCount, cudaDeviceProp* deviceProp,FILE* logFile);
 int write_config_log(options con,FILE* logFile);
 
 //flows
-int initial_flows(options config, singleBox* &initFlows,molecules* initMol, singleBox* &gpuSingleBox, int lines, potentialParam* allParams, potentialParam* gpuParams);
+int initial_flows(options &config, singleBox* &initFlows,molecules* initMol, singleBox* &gpuSingleBox, int lines, potentialParam* allParams, potentialParam* gpuParams,potentialParam* hostParams, mixParam** gpuMixParams, mixParam** hostMixParams,cudaDeviceProp* deviceProp);
 int freeAll(singleBox* &gpuSingleBox,singleBox* &initFlows,options config);
 int read_top(potentialParam* &allParams,int &lines);
 char* remove_space(char* input);
 int text_left(char* in, char* &out);
+
+__global__ void single_calc(singleBox* gpuSingleBox, potentialParam* gpuParams,int yDim);
+__device__ void single_calc_totenergy(int yDim, potentialParam* gpuParams);
 #endif
