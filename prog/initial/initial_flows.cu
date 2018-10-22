@@ -35,6 +35,7 @@ int initial_flows(options &config, singleBox* &initFlows,molecules* initMol, sin
     srand(time(0));
     //create arrays
 //    moleculesNumber=(int*) malloc(config.subNum * sizeof(int));
+//   initFlows[i].boxLen=(float*)malloc(config.flowNum*sizeof(float));
     for(int i=0; i<config.flowNum;i++){
         initFlows[i].molNum=moleculePerBox;
         //get latice size 
@@ -47,7 +48,8 @@ int initial_flows(options &config, singleBox* &initFlows,molecules* initMol, sin
         l_t = (int*) malloc(latice3*sizeof(int));  //check place busy
         //define system size
         if(config.flowEns[i]==NVT){
-            laticeDelta=pow(initFlows[i].molNum/(config.flowN[i]*NA/1.0e24),1.0/3.0)/latice;
+            initFlows[i].boxLen=pow(initFlows[i].molNum/(config.flowN[i]*NA/1.0e24),1.0/3.0);
+            laticeDelta=initFlows[i].boxLen/latice;
             printf("latice delta %f\n", laticeDelta);
         }
         //get coordinats

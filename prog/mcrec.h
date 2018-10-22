@@ -67,6 +67,8 @@ typedef struct{
     float** xa; //coordinats of atoms
     float** ya;
     float** za;
+    
+    float boxLen;
 } singleBox;
 
 typedef struct{
@@ -114,5 +116,8 @@ char* remove_space(char* input);
 int text_left(char* in, char* &out);
 
 __global__ void single_calc(singleBox* gpuSingleBox, potentialParam* gpuParams,int yDim);
-__device__ void single_calc_totenergy(int yDim, potentialParam* gpuParams);
+__device__ void single_calc_totenergy(int yDim, singleBox* gpuSingleBox, potentialParam* gpuParams);
+__device__ void single_calc_one_potential(int a, int b, singleBox* gpuSingleBox, potentialParam* gpuParams);
+__device__ void intra_potential(int a, int b, singleBox* gpuSingleBox, potentialParam* gpuMixParams);
+__device__ void inter_potential();
 #endif
