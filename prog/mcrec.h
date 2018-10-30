@@ -4,6 +4,7 @@
 #include <cuda.h>
 #include <vector_types.h>
 #include "global.h"
+#include <stdio.h>
 
 extern struct options{
     int subNum;
@@ -18,11 +19,15 @@ extern struct options{
     int mixRule;    //mixrule
     int singleXDim; //y dimension of threads
     int singleYDim; //y dimension of threads
+    
+    //
+    int potNum; //numbers of potential parameters
 } config;
 
 extern struct molecules{
     int atomNum;
     char** aName;
+    unsigned int* aType;
     float* x;
     float* y;
     float* z;
@@ -67,7 +72,6 @@ typedef struct{
     float** xa; //coordinats of atoms
     float** ya;
     float** za;
-    
     float boxLen;
 } singleBox;
 
@@ -87,6 +91,44 @@ typedef struct{
     float charge;
 } mixParam;
 
+//GPU structures
+typedef struct{
+    float* xm;
+    float* ym;
+    float* zm;
+    unsigned int* molNum;    //numbers of molecules
+    unsigned int* typeMolNum;    //numbers of each type of molecule
+    unsigned int* mType;
+    //
+    float* xa;
+    float* ya;
+    float* za;
+    unsigned int* aType;
+
+} gSingleBox;
+
+typedef struct{ //topology
+    unsigned int* aNum;  //numbers of atom in molecule
+    unsigned int* aType;    //type of atom in molecule
+    float* sigma;
+    float* epsi;
+    float* charge;
+    float* mass;
+//    float alpha;
+    //bonds
+    
+    //angles
+    
+    //torsion
+    
+    
+} gMolecula;
+
+typedef struct{ //config
+    unsigned int subNum;
+    unsigned int flowNum;
+    float* Temp;
+} gOptions;
 
 //    int vaporNum;   //molecules in vapor phase
 //    int liquidNum;  //molecules in liquid phase
@@ -109,15 +151,18 @@ int write_prop_log(int deviceCount, cudaDeviceProp* deviceProp,FILE* logFile);
 int write_config_log(options con,FILE* logFile);
 
 //flows
-int initial_flows(options &config, singleBox* &initFlows,molecules* initMol, singleBox* &gpuSingleBox, int lines, potentialParam* allParams, potentialParam* gpuParams,potentialParam* hostParams, mixParam** gpuMixParams, mixParam** hostMixParams,cudaDeviceProp* deviceProp);
+int initial_flows(options &config, singleBox* &initFlows,molecules* initMol, singleBox* &gpuSingleBox, int lines, potentialParam* allParams, potentialParam* gpuParams,potentialParam* &hostParams, mixParam** gpuMixParams, mixParam** hostMixParams,cudaDeviceProp* deviceProp);
 int freeAll(singleBox* &gpuSingleBox,singleBox* &initFlows,options config);
 int read_top(potentialParam* &allParams,int &lines);
 char* remove_space(char* input);
 int text_left(char* in, char* &out);
+int data_to_device(gSingleBox &gBox, singleBox* &inputData, gOptions gConf, options &config, gMolecula gTop, potentialParam* Param, molecules* initMol);
 
-__global__ void single_calc(singleBox* gpuSingleBox, potentialParam* gpuParams,int yDim);
-__device__ void single_calc_totenergy(int yDim, singleBox* gpuSingleBox, potentialParam* gpuParams);
-__device__ void single_calc_one_potential(int a, int b, singleBox* gpuSingleBox, potentialParam* gpuParams);
-__device__ void intra_potential(int a, int b, singleBox* gpuSingleBox, potentialParam* gpuMixParams);
+
+
+__global__ void single_calc(singleBox* gpuSingleBox, potentialParam* gpuParams,int yDim, mixParam** gpuMixParams);
+__device__ int single_calc_totenergy(int yDim, singleBox* gpuSingleBox, potentialParam* gpuParams, mixParam** gpuMixParams);
+__device__ void single_calc_one_potential(int a, int b, singleBox* gpuSingleBox, potentialParam* gpuParams, mixParam** gpuMixParams);
+__device__ void intra_potential(int a, int b, singleBox* gpuSingleBox, potentialParam* gpuParams, mixParam** gpuMixParams);
 __device__ void inter_potential();
 #endif

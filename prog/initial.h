@@ -14,3 +14,10 @@ potentialParam* gpuParams;
 potentialParam* hostParams;
 mixParam** gpuMixParams;
 mixParam** hostMixParams;
+
+//GPU data
+gSingleBox gBox;
+gOptions gConf;
+gMolecula gTop;
+
+

@@ -11,6 +11,10 @@ int main (int argc, char * argv[]){
     logFile=fopen("calculation.log","w");
     //
     get_device_prop(deviceCount, deviceProp);
+    if(deviceCount<1){
+        printf("No CUDA device is detected\n");
+        return 1;
+    }
     write_prop_log(deviceCount,deviceProp,logFile);
     //read initial data
     read_options(config);
@@ -25,16 +29,19 @@ int main (int argc, char * argv[]){
     }
     printf("number of top lines %d\n",paramsLines);
     //create initial simulation
-    initial_flows(config, initFlows,initMol,gpuSingleBox,paramsLines,allParams,gpuParams,hostParams, gpuMixParams, hostMixParams,deviceProp);
+    initial_flows(config, initFlows, initMol, gpuSingleBox, paramsLines, allParams, gpuParams, hostParams, gpuMixParams, hostMixParams, deviceProp);
+    //copy data to GPU device
+    data_to_device(gBox, initFlows,gConf, config, gTop, hostParams, initMol);
+    printf("ololo\n");
     printf("\n test %d \n", initFlows[0].molNum);
     //put data to device
 //    data_to_device(initFlows,gpuSingleBox,config);
     
     printf("\n test2 %d %d \n", initFlows[0].molNum, config.flowNum);
     ///calculate initial flows
-    dim3 singleThread(config.singleXDim);
-    printf(" grid %d  - %d \n", singleThread.x, singleThread.y);
-    single_calc<<<config.flowNum,singleThread>>>(gpuSingleBox,gpuParams,config.singleYDim);
+//    dim3 singleThread(config.singleXDim);
+//    printf(" grid %d  - %d \n", singleThread.x, singleThread.y);
+//    single_calc<<<config.flowNum,singleThread>>>(gpuSingleBox,gpuParams,config.singleYDim, gpuMixParams);
 //close log file
     freeAll(gpuSingleBox,initFlows,config);
     fclose(logFile);

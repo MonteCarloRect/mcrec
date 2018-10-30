@@ -19,6 +19,7 @@ int read_init_gro(options config, molecules* &initial){
             initial[i].atomNum=atoi(tempString);
             printf("atom number %d\n", initial[i].atomNum);
             initial[i].aName=(char**) malloc (initial[i].atomNum *sizeof(char*));
+            initial[i].aType=(unsigned int*) malloc(initial[i].atomNum *sizeof(int));
             for(int j=0;j<initial[i].atomNum;j++){
                 initial[i].aName[j]=(char*)malloc (5*sizeof(char));
             }

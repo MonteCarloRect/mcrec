@@ -4,40 +4,45 @@
 #include "../mcrec.h"
 #include <time.h>
 
-#include "cuPrintf.cuh"
-#include "cuPrintf.cu"
+//#include "cuPrintf.cuh"
+//#include "cuPrintf.cu"
 
-__global__ void single_calc(singleBox* gpuSingleBox, potentialParam* gpuParams,int yDim){
+__global__ void single_calc(singleBox* gpuSingleBox, potentialParam* gpuParams,int yDim, mixParam** gpuMixParams){
+    int test;
     //calculate initial enegry, pressure and other
     //printf("ololo id %d blockIdx.x  %d blockIdx.y %d blockDim.x \n", threadIdx.x, threadIdx.y, blockDim.x);
-    single_calc_totenergy(yDim,gpuSingleBox,gpuParams);
+    test=single_calc_totenergy(yDim, gpuSingleBox, gpuParams, gpuMixParams);
     //main cycle
-    
+    test=gpuSingleBox[0].molNum;
+    printf("test %f\n",gpuSingleBox[0].boxLen);
 }
 
-__device__ void single_calc_totenergy(int yDim, singleBox* gpuSingleBox, potentialParam* gpuParams){
-    //printf("ololo 4");
+__device__ int single_calc_totenergy(int yDim, singleBox* gpuSingleBox, potentialParam* gpuParams, mixParam** gpuMixParams){
     float* en;
-    en=(float*)malloc(yDim*blockDim.x*sizeof(float));
-    //cudaMalloc(&en, yDim*blockDim.x*sizeof(float));
-    
-    for(int i=0;i<yDim;i++){    //for several molecules per thread
-        int curMol=threadIdx.x+i*blockDim.x;
-        //printf("id %d\n", curMol);
-        for(int j=curMol++;j<yDim*blockDim.x;j++){
-            //calculate energy curMol and j molecules
-            single_calc_one_potential(curMol,j,gpuSingleBox,gpuParams);
-        }
-    }
+    //printf("my_test %d\n",blockIdx.y);
+//    printf("my_test id %d blockIdx.x  %d blockIdx.y %d blockDim.x \n", threadIdx.x, threadIdx.y, blockDim.x);
+//    en=(float*)malloc(yDim*blockDim.x*sizeof(float));
+//    //cudaMalloc(&en, yDim*blockDim.x*sizeof(float));
+//    
+//    for(int i=0;i<yDim;i++){    //for several molecules per thread
+//        int curMol=threadIdx.x+i*blockDim.x;
+//        //printf("id %d\n", curMol);
+//        for(int j=curMol++;j<yDim*blockDim.x;j++){
+//            //calculate energy curMol and j molecules
+//            single_calc_one_potential(curMol, j, gpuSingleBox, gpuParams, gpuMixParams);
+//        }
+//    }
+//    //summm potential
+    return 0;
 }
 
 //calculate potential
-__device__ void single_calc_one_potential(int a, int b, singleBox* gpuSingleBox, potentialParam* gpuParams){
-    intra_potential(a,b,gpuSingleBox,gpuParams);
+__device__ void single_calc_one_potential(int a, int b, singleBox* gpuSingleBox, potentialParam* gpuParams, mixParam** gpuMixParams){
+    intra_potential(a,b,gpuSingleBox,gpuParams, gpuMixParams);
     inter_potential();
 }
 
-__device__ void intra_potential(int a, int b, singleBox* gpuSingleBox, potentialParam* gpuMixParams){
+__device__ void intra_potential(int a, int b, singleBox* gpuSingleBox, potentialParam* gpuParams, mixParam** gpuMixParams){
     //Lennard-Jones potential
     float sumE; //energy
     float sumV;    //virial 
@@ -48,6 +53,8 @@ __device__ void intra_potential(int a, int b, singleBox* gpuSingleBox, potential
     float dx;   //
     float dy;
     float dz;
+    float sig;
+    float eps;
     
     sumE=0;
     sumV=0;
@@ -82,20 +89,29 @@ __device__ void intra_potential(int a, int b, singleBox* gpuSingleBox, potential
     else{
         dz=gpuSingleBox[blockIdx.x].zm[a]-gpuSingleBox[blockIdx.x].zm[b];
     }
-    
+    printf("check \n");
     for(int i=0;i<gpuSingleBox[blockIdx.x].aNum[a];i++){
         for(int j=0;j<gpuSingleBox[blockIdx.x].aNum[b];j++){
             //check LJ potentail
             //calculate r
-            xa=gpuSingleBox[blockIdx.x].xa[i]-gpuSingleBox[blockIdx.x].xa[j]-1;
-            sumE+=1;
+            xa=gpuSingleBox[blockIdx.x].xa[i]-gpuSingleBox[blockIdx.x].xa[j]+dx;
+            ya=gpuSingleBox[blockIdx.x].ya[i]-gpuSingleBox[blockIdx.x].ya[j]+dy;
+            dz=gpuSingleBox[blockIdx.x].za[i]-gpuSingleBox[blockIdx.x].za[j]+dz;
+            ra=xa*xa+ya*ya+za*za;
+            
+            eps=gpuMixParams[gpuSingleBox[blockIdx.x].aType[a][i]][gpuSingleBox[blockIdx.x].aType[b][j]].epsilon;
+            sig=gpuMixParams[gpuSingleBox[blockIdx.x].aType[a][i]][gpuSingleBox[blockIdx.x].aType[b][j]].sigma;
+            ra=sig*sig/ra;
+            ra=ra*ra*ra;
+            sumE+=4.0*eps*(ra*ra-ra);
+            sumV+=4.0*eps*(6.0*ra-12*ra*ra);
         }
     }
-    
+    printf(" sumE  %f sum %f\n", sumE, sumV);
 }
 
 __device__ void inter_potential(){
-    
+    printf("ololo\n");
 }
 
 
