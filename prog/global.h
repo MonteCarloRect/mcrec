@@ -4,6 +4,7 @@
 #define BUFFER 255
 #define NVT 0
 #define NA 6.02214129e23
+#define R 8.3144598f
 
 #define LB 1   //Lorenz-Berthelot
 

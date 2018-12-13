@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 project(mcrec)
 find_package(CUDA QUIET REQUIRED)
+#find_package(C)
+find_library(CURAND_LIB curand)
 
-
+#CUDA_ADD_LIBRARY(curand)
 
 include_directories(
     initial
@@ -33,4 +35,4 @@ set_property(TARGET mcrec PROPERTY CUDA_SEPARABLE_COMPILATION ON)
 
 #target_link_libraries(
 #    hellocuda
-#) cmake .. -DCMAKE_C_COMPILER=/usr/bin/gcc-6
+#) cmake .. -DCMAKE_C_COMPILER=/usr/bin/gcc-6 -DCMAKE_CXX_COMPILER=/usr/bin/g++-6

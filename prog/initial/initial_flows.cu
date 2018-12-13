@@ -6,7 +6,7 @@
 #include <time.h>
 //#include "../initial.h"
 
-int initial_flows(options &config, singleBox* &initFlows,molecules* initMol, singleBox* &gpuSingleBox, int lines, potentialParam* allParams, potentialParam* gpuParams, potentialParam* &hostParams, mixParam** gpuMixParams, mixParam** hostMixParams,cudaDeviceProp* deviceProp){
+int initial_flows(options &config, singleBox* &initFlows,molecules* initMol, singleBox* &gpuSingleBox, int lines, potentialParam* allParams, potentialParam* gpuParams, potentialParam* &hostParams, mixParam** gpuMixParams, mixParam** hostMixParams, cudaDeviceProp* deviceProp){
     float* l_x; //latice coords
     float* l_y;
     float* l_z;
@@ -26,7 +26,7 @@ int initial_flows(options &config, singleBox* &initFlows,molecules* initMol, sin
     float* h_temp_f;
     //int sizey;
         
-    config.singleXDim=ceil(deviceProp[0].maxThreadsPerBlock);
+    config.singleXDim=ceil(deviceProp[0].maxThreadsPerBlock/2);
     config.singleYDim=ceil(2000/config.singleXDim)+1;
     moleculePerBox=config.singleXDim*config.singleYDim;
     srand(time(0));
@@ -52,7 +52,7 @@ int initial_flows(options &config, singleBox* &initFlows,molecules* initMol, sin
         if(config.flowEns[i]==NVT){
             initFlows[i].boxLen=pow(initFlows[i].molNum/(config.flowN[i]*NA/1.0e24),1.0/3.0);
             laticeDelta=initFlows[i].boxLen/latice;
-            printf("latice delta %f\n", laticeDelta);
+            printf("latice delta %f boxlenth  %f\n", laticeDelta, initFlows[i].boxLen);
         }
         //get coordinats
         id=0;
@@ -92,7 +92,7 @@ int initial_flows(options &config, singleBox* &initFlows,molecules* initMol, sin
                     initFlows[i].ym[id]=l_y[randMol];
                     initFlows[i].zm[id]=l_z[randMol];
                     l_t[randMol]=1; //now plase not empty
-                    initFlows[i].type[id]=i;
+                    initFlows[i].type[id]=j;
                     id++;
                     sum++;
                 }
@@ -202,6 +202,7 @@ int initial_flows(options &config, singleBox* &initFlows,molecules* initMol, sin
                      abs(strcmp(initMol[initFlows[i].type[j]].aName[k],hostParams[chk].aName))==127 ){
                         initMol[i].aType[k]=chk;    //set atoms type number
                         initFlows[i].aType[j][k]=chk;
+                        //printf("flow %d molecula %d atom %d type %d\n", i, j, k, chk);
                     }
                 }
                 
@@ -210,49 +211,7 @@ int initial_flows(options &config, singleBox* &initFlows,molecules* initMol, sin
         }
         
     }
-    
-    //malloc gpu mix params
-//    cudaMalloc(&gpuMixParams,linesEnd*linesEnd*sizeof(mixParam));
-//    cudaMemcpy(gpuMixParams,hostMixParams,linesEnd*linesEnd*sizeof(mixParam),cudaMemcpyHostToDevice);
-//    for(int i=0;i<linesEnd;i++){
-//        cudaMalloc(&gpuMixParams[i],linesEnd*sizeof(mixParam));
-//    }
-    
-    //malloc parameters
-//    cudaMalloc(&gpuParams,linesEnd*sizeof(potentialParam));
-//    cudaMemcpy(gpuParams,hostParams,linesEnd*sizeof(potentialParam),cudaMemcpyHostToDevice);
-    
-//    cudaMemcpy(gpuParams,)
-    
-//        //get numbers of molecules of each substance
-//        sum=0;
-//        for(int s_i=0; s_i<config.subNum-1;s_i++){
-//            moleculesNumber[s_i]=ceil(config.flowX[i][s_i]*initFlows[i].molNum);
-//            sum+=moleculesNumber[s_i];
-//        }
-//        moleculesNumber[config.subNum-1]=initFlows[i].molNum - sum;
-//        //set molecules to placees
-//        id=0;
-//        for(int cur_sub=0;cur_sub<config.subNum;cur_sub++){
-//            set=0;
-//            while(set<moleculesNumber[cur_sub]){
-//                //get random position
-//                curRand = rand() % latice3;
-//                if(check[curRand]/=-1){
-//                    check[curRand]=cur_sub;
-//                    initFlows[i].xm[id]=l_x[curRand];
-//                    initFlows[i].ym[id]=l_y[curRand];
-//                    initFlows[i].zm[id]=l_z[curRand];
-//                    id++;
-//                    set++;
-////                    printf("set %d %d\n",set,curRand);
-//                }
-//            }
-//        }
-//    }
-        
-        
-    return 1;
+    return 0;
 }
 
 

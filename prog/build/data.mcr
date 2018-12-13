@@ -1,5 +1,5 @@
 2
-A.gro	eth.gro
+A.gro	B.gro
 1
 nvt
 1.0

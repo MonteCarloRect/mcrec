@@ -1,10 +1,20 @@
 #ifndef MC_H
 #define MC_H
+
 #include <cuda_runtime.h>
+
 #include <cuda.h>
 #include <vector_types.h>
-#include "global.h"
+#include <time.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+//#include <curand_kernel.h>
+//#include <curand.h>
+
+#include "global.h"
+
 
 extern struct options{
     int subNum;
@@ -27,7 +37,7 @@ extern struct options{
 extern struct molecules{
     int atomNum;
     char** aName;
-    unsigned int* aType;
+    int* aType;
     float* x;
     float* y;
     float* z;
@@ -96,20 +106,43 @@ typedef struct{
     float* xm;
     float* ym;
     float* zm;
-    unsigned int* molNum;    //numbers of molecules
-    unsigned int* typeMolNum;    //numbers of each type of molecule
-    unsigned int* mType;
+    int* molNum;    //numbers of molecules
+    int* typeMolNum;    //numbers of each type of molecule
+    int* mType;
     //
     float* xa;
     float* ya;
     float* za;
-    unsigned int* aType;
+    int* aType;
 
+    int* fMol;  //first molecule of flow
+    int* fAtom; //first atom of molecule
+    
+    float* boxLen; //box length
+    
+    //flow energy
+    float* virial;
+    float* energy;
+    //float* LJEnergy;
+    
+    //molecule enegry
+    float* mVirial;
+    float* mEnergy;
+    
+    float* oldEnergy;
+    float* oldVirial;
+    float* newEnergy;
+    float* newVirial;
+    
+    
+    float* transMaxMove;
+    int* curMol;
+    
 } gSingleBox;
 
 typedef struct{ //topology
-    unsigned int* aNum;  //numbers of atom in molecule
-    unsigned int* aType;    //type of atom in molecule
+    int* aNum;  //numbers of atom in molecule
+    int* aType;    //type of atom in molecule
     float* sigma;
     float* epsi;
     float* charge;
@@ -125,8 +158,9 @@ typedef struct{ //topology
 } gMolecula;
 
 typedef struct{ //config
-    unsigned int subNum;
-    unsigned int flowNum;
+    int subNum;
+    int flowNum;
+    int* potNum;
     float* Temp;
 } gOptions;
 
@@ -156,13 +190,16 @@ int freeAll(singleBox* &gpuSingleBox,singleBox* &initFlows,options config);
 int read_top(potentialParam* &allParams,int &lines);
 char* remove_space(char* input);
 int text_left(char* in, char* &out);
-int data_to_device(gSingleBox &gBox, singleBox* &inputData, gOptions gConf, options &config, gMolecula gTop, potentialParam* Param, molecules* initMol);
+int data_to_device(gSingleBox &gBox, singleBox* &inputData, gOptions &gConf, options &config, gMolecula &gTop, potentialParam* Param, molecules* initMol);
 
 
 
-__global__ void single_calc(singleBox* gpuSingleBox, potentialParam* gpuParams,int yDim, mixParam** gpuMixParams);
-__device__ int single_calc_totenergy(int yDim, singleBox* gpuSingleBox, potentialParam* gpuParams, mixParam** gpuMixParams);
-__device__ void single_calc_one_potential(int a, int b, singleBox* gpuSingleBox, potentialParam* gpuParams, mixParam** gpuMixParams);
-__device__ void intra_potential(int a, int b, singleBox* gpuSingleBox, potentialParam* gpuParams, mixParam** gpuMixParams);
-__device__ void inter_potential();
+__global__ void single_calc(int yDim,gOptions gConf, gMolecula gTop, gSingleBox gBox);
+__device__ int single_calc_totenergy(int yDim, gOptions gConf, gMolecula gTop, gSingleBox &gBox);
+__device__ int single_calc_one_potential(int a, int b, gOptions gConf, gMolecula gTop, gSingleBox &gBox, float &En, float &Vir);
+
+__device__ int inter_potential(int a, int b, gOptions gConf, gMolecula gTop, gSingleBox &gBox, float &En, float &Vir);
+__device__ int intra_potential(int a, gOptions gConf, gMolecula gTop, gSingleBox &gBox);
+
 #endif
+//

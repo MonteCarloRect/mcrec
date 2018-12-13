@@ -16,6 +16,7 @@ mixParam** gpuMixParams;
 mixParam** hostMixParams;
 
 //GPU data
+cudaError_t cuErr;
 gSingleBox gBox;
 gOptions gConf;
 gMolecula gTop;

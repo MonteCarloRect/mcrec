@@ -3,6 +3,8 @@
 #include "global.h"
 #include "mcrec.h"
 #include "initial.h"
+//#include <curand_kernel.h>
+//#include <curand.h>
 
 
 int main (int argc, char * argv[]){
@@ -32,16 +34,16 @@ int main (int argc, char * argv[]){
     initial_flows(config, initFlows, initMol, gpuSingleBox, paramsLines, allParams, gpuParams, hostParams, gpuMixParams, hostMixParams, deviceProp);
     //copy data to GPU device
     data_to_device(gBox, initFlows,gConf, config, gTop, hostParams, initMol);
+    cuErr = cudaGetLastError();
+    printf("Cuda data2device last error: %s\n", cudaGetErrorString(cuErr));
+    //calculate initial flows
+    dim3 singleThread(config.singleXDim);
+    printf(" grid %d  - %d \n", singleThread.x, singleThread.y);
+    single_calc<<<config.flowNum, singleThread>>>(config.singleYDim, gConf, gTop, gBox);
+    cudaDeviceSynchronize();
+    cuErr = cudaGetLastError();
+    printf("Cuda singlecalc last error: %s\n", cudaGetErrorString(cuErr));
     printf("ololo\n");
-    printf("\n test %d \n", initFlows[0].molNum);
-    //put data to device
-//    data_to_device(initFlows,gpuSingleBox,config);
-    
-    printf("\n test2 %d %d \n", initFlows[0].molNum, config.flowNum);
-    ///calculate initial flows
-//    dim3 singleThread(config.singleXDim);
-//    printf(" grid %d  - %d \n", singleThread.x, singleThread.y);
-//    single_calc<<<config.flowNum,singleThread>>>(gpuSingleBox,gpuParams,config.singleYDim, gpuMixParams);
 //close log file
     freeAll(gpuSingleBox,initFlows,config);
     fclose(logFile);
