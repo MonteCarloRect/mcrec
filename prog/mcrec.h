@@ -119,6 +119,7 @@ typedef struct{
     int* fAtom; //first atom of molecule
     
     float* boxLen; //box length
+    float* boxVol;  //box volume
     
     //flow energy
     float* virial;
@@ -129,6 +130,9 @@ typedef struct{
     float* mVirial;
     float* mEnergy;
     
+    float* mEnergyT;    //for total energy
+    float* mVirialT;
+    
     float* oldEnergy;
     float* oldVirial;
     float* newEnergy;
@@ -137,6 +141,16 @@ typedef struct{
     
     float* transMaxMove;
     int* curMol;
+    //flow prop
+    int* accept;
+    int* reject;
+    
+    float* eqBlockEnergy;
+    float* eqBlockPressure;
+    
+    float* eqEnergy;    //current energy
+    float* eqPressure;  //current pressure
+    
     
 } gSingleBox;
 
@@ -162,6 +176,9 @@ typedef struct{ //config
     int flowNum;
     int* potNum;
     float* Temp;
+    
+
+    
 } gOptions;
 
 //    int vaporNum;   //molecules in vapor phase
@@ -196,7 +213,6 @@ int data_to_device(gSingleBox &gBox, singleBox* &inputData, gOptions &gConf, opt
 
 __global__ void single_calc(int yDim,gOptions gConf, gMolecula gTop, gSingleBox gBox);
 __device__ int single_calc_totenergy(int yDim, gOptions gConf, gMolecula gTop, gSingleBox &gBox);
-__device__ int single_calc_one_potential(int a, int b, gOptions gConf, gMolecula gTop, gSingleBox &gBox, float &En, float &Vir);
 
 __device__ int inter_potential(int a, int b, gOptions gConf, gMolecula gTop, gSingleBox &gBox, float &En, float &Vir);
 __device__ int intra_potential(int a, gOptions gConf, gMolecula gTop, gSingleBox &gBox);
