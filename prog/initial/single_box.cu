@@ -11,7 +11,8 @@ __device__ int single_conf_change(int a, gOptions gConf, gMolecula gTop, gSingle
 __device__ int single_one_energy(int yDim, int a, gOptions gConf, gMolecula gTop, gSingleBox &gBox);
 __device__ int single_get_prop(int yDim, gOptions gConf, gMolecula gTop, gSingleBox &gBox, int curId);
 __device__ int single_change_trans(gOptions gConf, gMolecula gTop, gSingleBox &gBox);
-
+__device__ int single_average_prop(int yDim, gOptions gConf, gMolecula gTop, gSingleBox &gBox, int &currentBlock, int &blockDone);
+__device__ int single_equlib_check(int yDim, gOptions gConf, gMolecula gTop, gSingleBox &gBox, int &currentBlock, bool &equlibrated);
 //
 //#include <curand_kernel.h>
 //#include <cuda.h>
@@ -28,13 +29,19 @@ __global__ void single_calc(int yDim, gOptions gConf, gMolecula gTop, gSingleBox
     __shared__ float3 oldMol;
     __shared__ float3 oldState[MAXATOM];
     float deltaE;
-    bool equlibrated;
+    __shared__ bool equlibrated;
+    int currentBlock;
+    int tempBlock;
+    int blockDone;  //indicate blocks are filled
     //calculate initial enegry, pressure and other
     //printf("ololo id %d blockIdx.x  %d blockIdx.y %d blockDim.x \n", threadIdx.x, threadIdx.y, blockDim.x);
     //test=single_calc_totenergy(yDim, gpuSingleBox, gpuParams, gpuMixParams);
     //main cycle
     //test=gpuSingleBox[0].molNum;
+    currentBlock = 0;   //current block for cheking equlibration
+    blockDone = 0;
     test=1;
+    tempBlock = 0;
     //printf("deb 81 %d \n", gTop.aNum[0]);
     single_calc_totenergy(yDim, gConf, gTop, gBox);
     __syncthreads();
@@ -122,7 +129,7 @@ __global__ void single_calc(int yDim, gOptions gConf, gMolecula gTop, gSingleBox
                 if(threadIdx.x==0){
                     printf(" thr %d step %d energy %f virial %f max trans %f\n",threadIdx.x, ncheck, gBox.energy[blockIdx.x], gBox.virial[blockIdx.x], gBox.transMaxMove[blockIdx.x] );
                 }
-                single_calc_totenergy(yDim, gConf, gTop, gBox);
+                //single_calc_totenergy(yDim, gConf, gTop, gBox);
             }
             
         }
@@ -130,10 +137,23 @@ __global__ void single_calc(int yDim, gOptions gConf, gMolecula gTop, gSingleBox
         single_get_prop(yDim, gConf, gTop, gBox, ncheck);
         
         }
+        //average properties
+        single_average_prop(yDim, gConf, gTop, gBox, currentBlock, blockDone);
+        single_calc_totenergy(yDim, gConf, gTop, gBox);
         //check equlibration
-        
-        equlibrated = true;
+        single_equlib_check(yDim, gConf, gTop, gBox, currentBlock, equlibrated);
+        if(threadIdx.x == 0){
+            printf("equlibrated %d\n", equlibrated);
+        }
+//        tempBlock++;
+//        if(tempBlock > 6){
+//            equlibrated = true;
+//        }
+//        equlibrated = true;
     }
+    if(threadIdx.x == 0){
+            printf("test ololo %d\n", equlibrated);
+        }
     if(threadIdx.x==0){
         printf("energy %f virial %f\n", gBox.energy[blockIdx.x], gBox.virial[blockIdx.x]);
         printf("accepted %d rejected %d\n", gBox.accept[blockIdx.x], gBox.reject[blockIdx.x]);
@@ -394,8 +414,8 @@ __device__ int single_get_prop(int yDim, gOptions gConf, gMolecula gTop, gSingle
         gBox.eqEnergy[blockIdx.x * EQBLOCKSIZE + curId] = gBox.energy[blockIdx.x] / gBox.molNum[blockIdx.x];
     
     // pressure p = nkT + 1/3 W Проверить коэффициенты
-        gBox.eqPressure[blockIdx.x * EQBLOCKSIZE + curId] = gConf.Temp[blockIdx.x] * gBox.molNum[blockIdx.x] / gBox.boxVol[blockIdx.x] + gBox.virial[blockIdx.x] /3.0f / gBox.molNum[blockIdx.x];
-//        printf("id %d energy %f pressure %f \n", curId, gBox.eqEnergy[blockIdx.x * EQBLOCKSIZE + curId], gBox.eqPressure[blockIdx.x * EQBLOCKSIZE + curId]);
+        gBox.eqPressure[blockIdx.x * EQBLOCKSIZE + curId] = gConf.Temp[blockIdx.x] * gBox.molNum[blockIdx.x] / gBox.boxVol[blockIdx.x] * 1.38064852*10.0 - gBox.virial[blockIdx.x] / gBox.boxVol[blockIdx.x] / 3.0f * 1.38064852*10.0;
+        //printf("id %d energy %f pressure %f \n", curId, gBox.eqEnergy[blockIdx.x * EQBLOCKSIZE + curId], gBox.eqPressure[blockIdx.x * EQBLOCKSIZE + curId]);
     }
     //get virial
     
@@ -437,3 +457,123 @@ __device__ int single_change_trans(gOptions gConf, gMolecula gTop, gSingleBox &g
     return 0;
 }
 
+__device__ int single_average_prop(int yDim, gOptions gConf, gMolecula gTop, gSingleBox &gBox, int &currentBlock, int &blockDone){
+    int reduce;
+    int reDim;
+    int blockOne;
+    int blockTwo;
+    //average
+    reduce = blockDim.x / 2;
+    reDim = (EQBLOCKSIZE / blockDim.x)+1;
+    //printf("blocksize %d dim %d redim %d \n", EQBLOCKSIZE, blockDim.x, reDim);
+    while(reduce > 0){
+        if(threadIdx.x < reduce){
+            for(int i = 0; i < reDim; i++){
+                blockOne = blockIdx.x*EQBLOCKSIZE + blockDim.x*i + threadIdx.x;
+                blockTwo = blockIdx.x*EQBLOCKSIZE + blockDim.x*i + threadIdx.x + reduce;
+                if(blockDim.x*i + threadIdx.x + reduce < EQBLOCKSIZE){
+                    gBox.eqEnergy[blockOne] += gBox.eqEnergy[blockTwo];
+                    gBox.eqPressure[blockOne] += gBox.eqPressure[blockTwo];
+                }
+            }
+        //printf(" reduce %d energy %f \n", reduce, gBox.mEnergy[reduce]);
+        }
+        reduce = reduce / 2;
+        __syncthreads();
+        //
+    }
+    //transther properties to upper block
+    if(threadIdx.x==0){
+        if(blockDone == 1){
+            for(int i = 0; i < EQBLOCKS-1; i++){
+                gBox.eqBlockEnergy[blockIdx.x*EQBLOCKS + i] = gBox.eqBlockEnergy[blockIdx.x*EQBLOCKS + i + 1];
+                gBox.eqBlockPressure[blockIdx.x*+EQBLOCKS + i] = gBox.eqBlockPressure[blockIdx.x*+EQBLOCKS + i + 1];
+            }
+        }
+    }
+    __syncthreads();
+    if(threadIdx.x==0){
+        for(int i=1; i < reDim; i++){
+            gBox.eqEnergy[blockIdx.x*EQBLOCKSIZE] += gBox.eqEnergy[blockIdx.x*EQBLOCKSIZE + blockDim.x*i];
+            gBox.eqPressure[blockIdx.x*EQBLOCKSIZE] += gBox.eqPressure[blockIdx.x*EQBLOCKSIZE + blockDim.x*i];
+        }
+        gBox.eqBlockEnergy[blockIdx.x * EQBLOCKS + currentBlock] = gBox.eqEnergy[blockIdx.x*EQBLOCKSIZE] / EQBLOCKSIZE;
+        gBox.eqBlockPressure[blockIdx.x * EQBLOCKS + currentBlock] = gBox.eqPressure[blockIdx.x*EQBLOCKSIZE] / EQBLOCKSIZE;
+    }
+    __syncthreads();
+    
+    if(threadIdx.x == 0){
+        printf("block number %d energy %f pressure %f blockDone %d \n", currentBlock, gBox.eqBlockEnergy[blockIdx.x * EQBLOCKS + currentBlock], gBox.eqBlockPressure[blockIdx.x * EQBLOCKS + currentBlock], blockDone);
+        if(currentBlock < EQBLOCKS-1){
+            currentBlock++; //add to current block number
+        }
+        else{
+            blockDone = 1;
+        }
+    }
+    __syncthreads();
+    //get energy
+    
+    return 0;
+}
+
+//Check equlibrium state
+//
+//
+__device__ int single_equlib_check(int yDim, gOptions gConf, gMolecula gTop, gSingleBox &gBox, int &currentBlock, bool &equlibrated){
+    int chkEn1;
+    int chkEn2;
+    int chkPr1;
+    int chkPr2;
+    float maxEn;
+    float maxPr;
+    if(threadIdx.x == 0){
+        chkEn1 = 0;
+        chkEn2 = 1;
+        chkPr1 = 0;
+        chkPr2 = 1;
+        if(currentBlock == EQBLOCKS-1 ){
+            //check average
+            gBox.eqEnergy[blockIdx.x] = 0.0f;
+            gBox.eqPressure[blockIdx.x] = 0.0f;
+            for(int i = 0; i < EQBLOCKS; i++){
+                gBox.eqEnergy[blockIdx.x] += gBox.eqBlockEnergy[blockIdx.x * EQBLOCKS + i];
+                gBox.eqPressure[blockIdx.x] += gBox.eqBlockPressure[blockIdx.x * EQBLOCKS + i];
+                printf("block %d qeen %f eqpr %f \n", i, gBox.eqBlockEnergy[blockIdx.x * EQBLOCKS + i], gBox.eqBlockPressure[blockIdx.x * EQBLOCKS + i]);
+            }
+            gBox.eqEnergy[blockIdx.x] = gBox.eqEnergy[blockIdx.x] / EQBLOCKS;
+            gBox.eqPressure[blockIdx.x] = gBox.eqPressure[blockIdx.x] / EQBLOCKS;
+            maxEn = abs( gBox.eqBlockEnergy[blockIdx.x * EQBLOCKS] - gBox.eqEnergy[blockIdx.x]);
+            maxPr = abs(gBox.eqBlockPressure[blockIdx.x * EQBLOCKS] - gBox.eqPressure[blockIdx.x]);
+            for(int i = 1; i < EQBLOCKS; i++){
+                if(abs(gBox.eqBlockEnergy[blockIdx.x * EQBLOCKS + i] - gBox.eqEnergy[blockIdx.x]) > maxEn){
+                    maxEn = abs(gBox.eqBlockEnergy[blockIdx.x * EQBLOCKS + i] - gBox.eqEnergy[blockIdx.x]);
+                }
+                if(abs(gBox.eqBlockPressure[blockIdx.x * EQBLOCKS + i] - gBox.eqPressure[blockIdx.x]) > maxPr){
+                    maxPr = abs(gBox.eqBlockPressure[blockIdx.x * EQBLOCKS + i] - gBox.eqPressure[blockIdx.x]);
+                }
+            }
+            maxEn = abs(maxEn / gBox.eqEnergy[blockIdx.x]);
+            maxPr = abs(maxPr / gBox.eqPressure[blockIdx.x]);
+            if(maxEn < 0.05){
+                chkEn1 = 1;
+            }
+            if(maxPr < 0.07){
+                chkPr1 = 1;
+            }
+            //check line
+            
+            if((chkEn1 == 1) && (chkEn2 == 1) && (chkPr1 == 1) && (chkPr2 == 1)){
+                printf("%sEqilibrated \n %s", ANSI_COLOR_GREEN, ANSI_COLOR_RESET);
+                printf("equlibrated: delta energy %f delta pressure %f \n", maxEn, maxPr);
+                equlibrated = true;
+            }
+            else{
+                printf("not equlibrated: delta energy %f delta pressure %f \n", maxEn, maxPr);
+            }
+        }
+        
+    }
+    __syncthreads();
+    return 1;
+}

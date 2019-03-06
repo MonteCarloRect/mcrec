@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "global.h"
 #include "mcrec.h"
 #include "initial.h"
@@ -8,7 +9,9 @@
 
 
 int main (int argc, char * argv[]){
-
+    //begin time
+    time(&beginTime);
+    printf("begin time %s", asctime(localtime(&beginTime))); 
 //openlog file
     logFile=fopen("calculation.log","w");
     //
@@ -17,7 +20,7 @@ int main (int argc, char * argv[]){
         printf("No CUDA device is detected\n");
         return 1;
     }
-    write_prop_log(deviceCount,deviceProp,logFile);
+    write_prop_log(deviceCount, deviceProp, logFile);
     //read initial data
     read_options(config);
     write_config_log(config,logFile);
@@ -33,7 +36,7 @@ int main (int argc, char * argv[]){
     //create initial simulation
     initial_flows(config, initFlows, initMol, gpuSingleBox, paramsLines, allParams, gpuParams, hostParams, gpuMixParams, hostMixParams, deviceProp);
     //copy data to GPU device
-    data_to_device(gBox, initFlows,gConf, config, gTop, hostParams, initMol);
+    data_to_device(gBox, initFlows, gConf, config, gTop, hostParams, initMol, hostData);
     cuErr = cudaGetLastError();
     printf("Cuda data2device last error: %s\n", cudaGetErrorString(cuErr));
     //calculate initial flows
@@ -43,10 +46,17 @@ int main (int argc, char * argv[]){
     cudaDeviceSynchronize();
     cuErr = cudaGetLastError();
     printf("Cuda singlecalc last error: %s\n", cudaGetErrorString(cuErr));
-    printf("ololo\n");
+    //get single box data from gpu
+    data_from_device(gBox, hostData, config);
+    //calculate pressure enegry correction
+    //!!!!!!!!!!!!!!!!
+    //print out results
+    write_singlebox_log(logFile, hostData);
 //close log file
     freeAll(gpuSingleBox,initFlows,config);
     fclose(logFile);
-
-
+    //end time
+    time(&endTime);
+    printf("end time %s\n", asctime(localtime(&endTime))); 
+    printf("elapsed time %f sec", difftime(endTime, beginTime));
 }

@@ -15,10 +15,15 @@ potentialParam* hostParams;
 mixParam** gpuMixParams;
 mixParam** hostMixParams;
 
+gSingleBox hostData;
+gMolecula hostTop;
+
 //GPU data
 cudaError_t cuErr;
 gSingleBox gBox;
 gOptions gConf;
 gMolecula gTop;
 
-
+//time
+time_t beginTime;
+time_t endTime;

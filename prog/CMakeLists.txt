@@ -26,6 +26,9 @@ cuda_add_executable(
     initial/read_top.cu
     initial/single_box.cu
     initial/data_to_device.cu
+    initial/data_from_device.cu
+    initial/rcut.cu
+    write/single_box_write.cu
 )
 #set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -o3")
 #set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -lm")

@@ -108,12 +108,12 @@ typedef struct{
     float* zm;
     int* molNum;    //numbers of molecules
     int* typeMolNum;    //numbers of each type of molecule
-    int* mType;
+    int* mType; //type of molecule
     //
     float* xa;
     float* ya;
     float* za;
-    int* aType;
+    int* aType; //type of atom
 
     int* fMol;  //first molecule of flow
     int* fAtom; //first atom of molecule
@@ -121,19 +121,24 @@ typedef struct{
     float* boxLen; //box length
     float* boxVol;  //box volume
     
+    //calculate total number of molecules and atoms
+    int tMol;
+    int tAtom;
+    
     //flow energy
-    float* virial;
+    float* virial;  //energy and virial of simulation cell
     float* energy;
+    float* pressure;
     //float* LJEnergy;
     
-    //molecule enegry
+    //enegry and virial per molecule
     float* mVirial;
     float* mEnergy;
     
     float* mEnergyT;    //for total energy
     float* mVirialT;
     
-    float* oldEnergy;
+    float* oldEnergy;   //old and new viral/energy
     float* oldVirial;
     float* newEnergy;
     float* newVirial;
@@ -144,14 +149,17 @@ typedef struct{
     //flow prop
     int* accept;
     int* reject;
+    int* tAccept;   //total accepted rejected per block
+    int* tReject;
     
-    float* eqBlockEnergy;
+    float* eqBlockEnergy;   //energy of block samples
     float* eqBlockPressure;
     
     float* eqEnergy;    //current energy
     float* eqPressure;  //current pressure
     
-    
+    float* energyCorr;  //corrections
+    float* pressureCorr;
 } gSingleBox;
 
 typedef struct{ //topology
@@ -207,7 +215,7 @@ int freeAll(singleBox* &gpuSingleBox,singleBox* &initFlows,options config);
 int read_top(potentialParam* &allParams,int &lines);
 char* remove_space(char* input);
 int text_left(char* in, char* &out);
-int data_to_device(gSingleBox &gBox, singleBox* &inputData, gOptions &gConf, options &config, gMolecula &gTop, potentialParam* Param, molecules* initMol);
+int data_to_device(gSingleBox &gBox, singleBox* &inputData, gOptions &gConf, options &config, gMolecula &gTop, potentialParam* Param, molecules* initMol, gSingleBox &hostData);
 
 
 
@@ -216,6 +224,9 @@ __device__ int single_calc_totenergy(int yDim, gOptions gConf, gMolecula gTop, g
 
 __device__ int inter_potential(int a, int b, gOptions gConf, gMolecula gTop, gSingleBox &gBox, float &En, float &Vir);
 __device__ int intra_potential(int a, gOptions gConf, gMolecula gTop, gSingleBox &gBox);
+
+int data_from_device(gSingleBox &gData, gSingleBox &hData, options config);
+int write_singlebox_log(FILE* logFile, gSingleBox &hData);
 
 #endif
 //
