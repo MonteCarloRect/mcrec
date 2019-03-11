@@ -152,11 +152,14 @@ typedef struct{
     int* tAccept;   //total accepted rejected per block
     int* tReject;
     
+    float* eqEnergy;    //current energy
+    float* eqPressure;  //current pressure
+    
     float* eqBlockEnergy;   //energy of block samples
     float* eqBlockPressure;
     
-    float* eqEnergy;    //current energy
-    float* eqPressure;  //current pressure
+    float* avEnergy;   //average energy of block samples
+    float* avPressure;
     
     float* energyCorr;  //corrections
     float* pressureCorr;
@@ -215,8 +218,8 @@ int freeAll(singleBox* &gpuSingleBox,singleBox* &initFlows,options config);
 int read_top(potentialParam* &allParams,int &lines);
 char* remove_space(char* input);
 int text_left(char* in, char* &out);
-int data_to_device(gSingleBox &gBox, singleBox* &inputData, gOptions &gConf, options &config, gMolecula &gTop, potentialParam* Param, molecules* initMol, gSingleBox &hostData);
-
+int data_to_device(gSingleBox &gBox, singleBox* &inputData, gOptions &gConf, options &config, gMolecula &gTop, potentialParam* Param, molecules* initMol, gSingleBox &hostData, gMolecula &hostTop, gOptions &hostConf);
+int rcut(gSingleBox &hostData, options config, gMolecula hostTop, molecules* &initMol, gOptions &hConf);
 
 
 __global__ void single_calc(int yDim,gOptions gConf, gMolecula gTop, gSingleBox gBox);

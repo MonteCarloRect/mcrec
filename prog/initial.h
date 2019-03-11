@@ -17,6 +17,7 @@ mixParam** hostMixParams;
 
 gSingleBox hostData;
 gMolecula hostTop;
+gOptions hostConf;
 
 //GPU data
 cudaError_t cuErr;

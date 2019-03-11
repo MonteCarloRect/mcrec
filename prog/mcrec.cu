@@ -36,7 +36,7 @@ int main (int argc, char * argv[]){
     //create initial simulation
     initial_flows(config, initFlows, initMol, gpuSingleBox, paramsLines, allParams, gpuParams, hostParams, gpuMixParams, hostMixParams, deviceProp);
     //copy data to GPU device
-    data_to_device(gBox, initFlows, gConf, config, gTop, hostParams, initMol, hostData);
+    data_to_device(gBox, initFlows, gConf, config, gTop, hostParams, initMol, hostData, hostTop, hostConf);
     cuErr = cudaGetLastError();
     printf("Cuda data2device last error: %s\n", cudaGetErrorString(cuErr));
     //calculate initial flows
@@ -49,7 +49,7 @@ int main (int argc, char * argv[]){
     //get single box data from gpu
     data_from_device(gBox, hostData, config);
     //calculate pressure enegry correction
-    //!!!!!!!!!!!!!!!!
+    rcut(hostData, config, hostTop, initMol, hostConf);
     //print out results
     write_singlebox_log(logFile, hostData);
 //close log file

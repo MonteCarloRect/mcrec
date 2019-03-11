@@ -27,7 +27,7 @@ int initial_flows(options &config, singleBox* &initFlows,molecules* initMol, sin
     //int sizey;
         
     config.singleXDim=ceil(deviceProp[0].maxThreadsPerBlock/2);
-    config.singleYDim=ceil(2000/config.singleXDim)+1;
+    config.singleYDim=ceil(4000/config.singleXDim)+1;
     moleculePerBox=config.singleXDim*config.singleYDim;
     srand(time(0));
     //printf(" ydim  %d molecule per box %d \n", config.singleYDim, moleculePerBox);
@@ -200,7 +200,7 @@ int initial_flows(options &config, singleBox* &initFlows,molecules* initMol, sin
                 for(int chk=0;chk<linesEnd;chk++){  //check from list
                     if(strcmp(initMol[initFlows[i].type[j]].aName[k],hostParams[chk].aName)==0 ||
                      abs(strcmp(initMol[initFlows[i].type[j]].aName[k],hostParams[chk].aName))==127 ){
-                        initMol[i].aType[k]=chk;    //set atoms type number
+                        //initMol[j].aType[k]=chk;    //set atoms type number
                         initFlows[i].aType[j][k]=chk;
                         //printf("flow %d molecula %d atom %d type %d\n", i, j, k, chk);
                     }
@@ -210,6 +210,16 @@ int initial_flows(options &config, singleBox* &initFlows,molecules* initMol, sin
             
         }
         
+    }
+    for(int i = 0; i < config.subNum; i++){ //for all molecules
+        for(int j = 0; j < initMol[i].atomNum; j++){   //for all atoms
+            for(int chk = 0; chk < linesEnd; chk++){
+                if(strcmp(initMol[i].aName[j], hostParams[chk].aName) == 0 || abs(strcmp(initMol[i].aName[j], hostParams[chk].aName) == 127)){
+                    initMol[i].aType[j] = chk;
+                    printf("molecula %d atom %d type %d\n", i, j, chk);
+                }
+            }
+        }
     }
     return 0;
 }

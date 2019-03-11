@@ -34,30 +34,30 @@ int data_from_device(gSingleBox &gData, gSingleBox &hData, options config){
     if(cuErr != cudaSuccess){
         printf("Cannot copy from device box.za file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
     }
-    //copy energy
-    cuErr = cudaMemcpy(hData.eqEnergy, gData.eqEnergy, config.flowNum*sizeof(int), cudaMemcpyDeviceToHost);
+    //copy averages energy
+    cuErr = cudaMemcpy(hData.avEnergy, gData.avEnergy, config.flowNum * sizeof(float), cudaMemcpyDeviceToHost);
     if(cuErr != cudaSuccess){
         printf("Cannot copy from device box.eqEnergy file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
     }
-    cuErr = cudaMemcpy(hData.eqPressure, gData.eqPressure, config.flowNum*sizeof(int), cudaMemcpyDeviceToHost);
+    cuErr = cudaMemcpy(hData.avPressure, gData.avPressure, config.flowNum * sizeof(float), cudaMemcpyDeviceToHost);
     if(cuErr != cudaSuccess){
         printf("Cannot copy from device box.eqPressure file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
     }
     //
-    cuErr = cudaMemcpy(hData.eqBlockEnergy, gData.eqBlockEnergy, config.flowNum*sizeof(int), cudaMemcpyDeviceToHost);
+    cuErr = cudaMemcpy(hData.eqBlockEnergy, gData.eqBlockEnergy, config.flowNum * EQBLOCKS *sizeof(float), cudaMemcpyDeviceToHost);
     if(cuErr != cudaSuccess){
         printf("Cannot copy from device box.eqBlockEnergy file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
     }
-    cuErr = cudaMemcpy(hData.eqBlockPressure, gData.eqBlockPressure, config.flowNum*sizeof(int), cudaMemcpyDeviceToHost);
+    cuErr = cudaMemcpy(hData.eqBlockPressure, gData.eqBlockPressure, config.flowNum * EQBLOCKS * sizeof(float), cudaMemcpyDeviceToHost);
     if(cuErr != cudaSuccess){
         printf("Cannot copy from device box.eqBlockPressure file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
     }
     //copy total accept/rejected
-    cuErr = cudaMemcpy(hData.tAccept, gData.tAccept, config.flowNum*sizeof(float), cudaMemcpyDeviceToHost);
+    cuErr = cudaMemcpy(hData.tAccept, gData.tAccept, config.flowNum * sizeof(int), cudaMemcpyDeviceToHost);
     if(cuErr != cudaSuccess){
         printf("Cannot copy from device box.eqPressure file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
     }
-    cuErr = cudaMemcpy(hData.tReject, gData.tReject, config.flowNum*sizeof(float), cudaMemcpyDeviceToHost);
+    cuErr = cudaMemcpy(hData.tReject, gData.tReject, config.flowNum * sizeof(int), cudaMemcpyDeviceToHost);
     if(cuErr != cudaSuccess){
         printf("Cannot copy from device box.eqPressure file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
     }

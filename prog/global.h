@@ -9,8 +9,8 @@
 #define PI 3.14159265359
 #define MAXATOM 50
 #define EQBLOCKS 5  //numbers of block for equlibrium
-#define EQBLOCKSIZE 5000  //numbers of mc steps in equlibriem block
-#define EQBLOCKCHECK 6
+#define EQBLOCKSIZE 20000  //numbers of mc steps in equlibriem block
+#define EQBLOCKCHECK 20
 
 //color console
 #define ANSI_COLOR_RED     "\x1b[31m"

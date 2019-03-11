@@ -1,6 +1,6 @@
 #include "../mcrec.h"
 
-int data_to_device(gSingleBox &gBox, singleBox* &inputData, gOptions &gConf, options &config, gMolecula &gTop, potentialParam* Param, molecules* initMol, gSingleBox &hostData){
+int data_to_device(gSingleBox &gBox, singleBox* &inputData, gOptions &gConf, options &config, gMolecula &gTop, potentialParam* Param, molecules* initMol, gSingleBox &hostData, gMolecula &hostTop, gOptions &hostConf){
     //allocate and copy data to GPU
     //gSingleBox hostData;
     int sum;
@@ -376,21 +376,47 @@ int data_to_device(gSingleBox &gBox, singleBox* &inputData, gOptions &gConf, opt
     if(cuErr != cudaSuccess){
         printf("Cannot allocate box.eqBlockEnergy memory file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
     }
-    cuErr =cudaMalloc(&gBox.eqBlockPressure, config.flowNum * EQBLOCKS * sizeof(float));
+    cuErr = cudaMalloc(&gBox.eqBlockPressure, config.flowNum * EQBLOCKS * sizeof(float));
     if(cuErr != cudaSuccess){
         printf("Cannot allocate box.eqBlockEnergy memory file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
     }
-    hostData.eqBlockEnergy = (float*)malloc(config.flowNum * EQBLOCKS * sizeof(float));
-    hostData.eqBlockPressure = (float*)malloc(config.flowNum * EQBLOCKS * sizeof(float));
-    for(int i=0; i < config.flowNum * EQBLOCKS; i++){
+    cuErr = cudaMalloc(&gBox.avEnergy, config.flowNum * sizeof(float));
+    if(cuErr != cudaSuccess){
+        printf("Cannot allocate box.avEnergy memory file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+    }
+    cuErr = cudaMalloc(&gBox.avPressure, config.flowNum * sizeof(float));
+    if(cuErr != cudaSuccess){
+        printf("Cannot allocate box.avPressure memory file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+    }
+    hostData.eqBlockEnergy = (float*) malloc(config.flowNum * EQBLOCKS * sizeof(float));
+    hostData.eqBlockPressure = (float*) malloc(config.flowNum * EQBLOCKS * sizeof(float));
+    hostData.avEnergy = (float*) malloc(config.flowNum * sizeof(float));
+    hostData.avPressure = (float*) malloc(config.flowNum * sizeof(float));
+    hostData.energyCorr = (float*) malloc(config.flowNum * EQBLOCKS * sizeof(float));
+    hostData.pressureCorr = (float*) malloc(config.flowNum * EQBLOCKS * sizeof(float));
+    for(int i = 0; i < config.flowNum * EQBLOCKS; i++){
         hostData.eqBlockEnergy[i]=0.0;
         hostData.eqBlockPressure[i]=0.0;
+    }
+    for(int i = 0; i < config.flowNum; i++){
+        hostData.avEnergy[i] = 0.0f;
+        hostData.avPressure[i] = 0.0f;
+        //printf("testtststs  %f   %f", hostData.avEnergy[i], hostData.avPressure[i]);
     }
     cuErr = cudaMemcpy(gBox.eqBlockEnergy, hostData.eqBlockEnergy, config.flowNum * EQBLOCKS * sizeof(float), cudaMemcpyHostToDevice);
     if(cuErr != cudaSuccess){
         printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
     }
     cuErr = cudaMemcpy(gBox.eqBlockPressure, hostData.eqBlockPressure, config.flowNum * EQBLOCKS * sizeof(float), cudaMemcpyHostToDevice);
+    if(cuErr != cudaSuccess){
+        printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+    }
+    cuErr = cudaMemcpy(gBox.avEnergy, hostData.avEnergy, config.flowNum * sizeof(float), cudaMemcpyHostToDevice);
+    if(cuErr != cudaSuccess){
+        printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        //return 2;
+    }
+    cuErr = cudaMemcpy(gBox.avPressure, hostData.avPressure, config.flowNum * sizeof(float), cudaMemcpyHostToDevice);
     if(cuErr != cudaSuccess){
         printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
     }
@@ -417,6 +443,7 @@ int data_to_device(gSingleBox &gBox, singleBox* &inputData, gOptions &gConf, opt
     if(cuErr != cudaSuccess){
         printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
     }
+    
     //============================TOPOLOGY
     //matrix
     hostTop.sigma=(float*) malloc (config.potNum * config.potNum * sizeof(float));
@@ -484,18 +511,29 @@ int data_to_device(gSingleBox &gBox, singleBox* &inputData, gOptions &gConf, opt
     }
     
     //============================CONFIG
-    gOptions hostConf;
     hostConf.Temp=(float*) malloc(config.flowNum*sizeof(float));
     hostConf.potNum=(int*) malloc(sizeof(int));
     for(int i=0; i<config.flowNum; i++){
         hostConf.Temp[i]=config.flowT[i];
     }
     hostConf.potNum[0]=config.potNum;   //to arrays
-    cudaMalloc(&gConf.Temp, config.flowNum*sizeof(float));
-    cudaMemcpy(gConf.Temp, hostConf.Temp, config.flowNum*sizeof(float), cudaMemcpyHostToDevice);
-    cudaMalloc(&gConf.potNum, sizeof(int));
-    cudaMemcpy(gConf.potNum, hostConf.potNum, sizeof(int), cudaMemcpyHostToDevice);
-    
+    printf("hostconf %d \n", hostConf.potNum[0]);
+    cuErr = cudaMalloc(&gConf.Temp, config.flowNum*sizeof(float));
+    if(cuErr != cudaSuccess){
+        printf("Cannot allocate gConf.Temp memory file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+    }
+    cuErr = cudaMemcpy(gConf.Temp, hostConf.Temp, config.flowNum*sizeof(float), cudaMemcpyHostToDevice);
+    if(cuErr != cudaSuccess){
+        printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+    }
+    cuErr = cudaMalloc(&gConf.potNum, sizeof(int));
+    if(cuErr != cudaSuccess){
+        printf("Cannot allocate gConf.potNum memory file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+    }
+    cuErr = cudaMemcpy(gConf.potNum, hostConf.potNum, sizeof(int), cudaMemcpyHostToDevice);
+    if(cuErr != cudaSuccess){
+        printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+    }
     
     return 0;
 }
