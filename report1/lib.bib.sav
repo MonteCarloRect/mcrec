@@ -1,0 +1,207 @@
+% Encoding: UTF-8
+
+@Article{Wittig2003,
+  author    = {Roland Wittig and Jürgen Lohmann and Jürgen Gmehling},
+  title     = {Vapor-Liquid Equilibria by {UNIFAC} Group Contribution. 6. Revision and Extension},
+  journal   = {Industrial {\&} Engineering Chemistry Research},
+  year      = {2003},
+  volume    = {42},
+  number    = {1},
+  pages     = {183--188},
+  month     = {jan},
+  doi       = {10.1021/ie020506l},
+  publisher = {American Chemical Society ({ACS})},
+}
+
+@Article{Skjold-Jorgensen1979,
+  author    = {Steen Skjold-Jorgensen and Barbel Kolbe and Jurgen Gmehling and Peter Rasmussen},
+  title     = {Vapor-Liquid Equilibria by {UNIFAC} Group Contribution. Revision and Extension},
+  journal   = {Industrial {\&} Engineering Chemistry Process Design and Development},
+  year      = {1979},
+  volume    = {18},
+  number    = {4},
+  pages     = {714--722},
+  month     = {oct},
+  doi       = {10.1021/i260072a024},
+  publisher = {American Chemical Society ({ACS})},
+}
+
+@Article{Tiegs1987,
+  author    = {Detlef Tiegs and Peter Rasmussen and Juergen Gmehling and Aage Fredenslund},
+  title     = {Vapor-liquid equilibria by {UNIFAC} group contribution. 4. Revision and extension},
+  journal   = {Industrial {\&} Engineering Chemistry Research},
+  year      = {1987},
+  volume    = {26},
+  number    = {1},
+  pages     = {159--161},
+  month     = {jan},
+  doi       = {10.1021/ie00061a030},
+  publisher = {American Chemical Society ({ACS})},
+}
+
+@Misc{wiki_progs,
+  title = {Comparison of software for molecular mechanics modeling},
+  url   = {\url{https://en.wikipedia.org/wiki/Comparison_of_software_for_molecular_mechanics_modeling}},
+}
+
+@Misc{material_studio,
+  title = {Materials Studio},
+  url   = {\url{http://www.3dsbiovia.com/products/collaborative-science/biovia-materials-studio/}},
+}
+
+@Misc{shedinger,
+  title = {Schr\"odinger Software},
+  url   = {\url{https://www.schrodinger.com/suites/materials-science-suite}},
+}
+
+@Article{Abraham2015,
+  author    = {Mark James Abraham and Teemu Murtola and Roland Schulz and Szil{\'{a}}rd P{\'{a}}ll and Jeremy C. Smith and Berk Hess and Erik Lindahl},
+  title     = {{GROMACS}: High performance molecular simulations through multi-level parallelism from laptops to supercomputers},
+  journal   = {{SoftwareX}},
+  year      = {2015},
+  volume    = {1-2},
+  pages     = {19--25},
+  month     = {sep},
+  doi       = {10.1016/j.softx.2015.06.001},
+  publisher = {Elsevier {BV}},
+}
+
+@Article{Berendsen1995,
+  author    = {H.J.C. Berendsen and D. van der Spoel and R. van Drunen},
+  title     = {{GROMACS}: A message-passing parallel molecular dynamics implementation},
+  journal   = {Computer Physics Communications},
+  year      = {1995},
+  volume    = {91},
+  number    = {1-3},
+  pages     = {43--56},
+  month     = {sep},
+  doi       = {10.1016/0010-4655(95)00042-e},
+  publisher = {Elsevier {BV}},
+}
+
+@Article{Pronk2013,
+  author    = {Sander Pronk and Szil{\'{a}}rd P{\'{a}}ll and Roland Schulz and Per Larsson and Pär Bjelkmar and Rossen Apostolov and Michael R. Shirts and Jeremy C. Smith and Peter M. Kasson and David van der Spoel and Berk Hess and Erik Lindahl},
+  title     = {{GROMACS} 4.5: a high-throughput and highly parallel open source molecular simulation toolkit},
+  journal   = {Bioinformatics},
+  year      = {2013},
+  volume    = {29},
+  number    = {7},
+  pages     = {845--854},
+  month     = {feb},
+  doi       = {10.1093/bioinformatics/btt055},
+  publisher = {Oxford University Press ({OUP})},
+}
+
+@Article{Plimpton1995,
+  author    = {Steve Plimpton},
+  title     = {Fast Parallel Algorithms for Short-Range Molecular Dynamics},
+  journal   = {Journal of Computational Physics},
+  year      = {1995},
+  volume    = {117},
+  number    = {1},
+  pages     = {1--19},
+  month     = {mar},
+  doi       = {10.1006/jcph.1995.1039},
+  publisher = {Elsevier {BV}},
+}
+
+@Article{Thompson2009,
+  author    = {Aidan P. Thompson and Steven J. Plimpton and William Mattson},
+  title     = {General formulation of pressure and stress tensor for arbitrary many-body interaction potentials under periodic boundary conditions},
+  journal   = {The Journal of Chemical Physics},
+  year      = {2009},
+  volume    = {131},
+  number    = {15},
+  pages     = {154107},
+  month     = {oct},
+  doi       = {10.1063/1.3245303},
+  publisher = {{AIP} Publishing},
+}
+
+@Article{Panagiotopoulos1987,
+  author    = {Athanassios Z. Panagiotopoulos},
+  title     = {Direct determination of phase coexistence properties of fluids by Monte Carlo simulation in a new ensemble},
+  journal   = {Molecular Physics},
+  year      = {1987},
+  volume    = {61},
+  number    = {4},
+  pages     = {813--826},
+  month     = {jul},
+  doi       = {10.1080/00268978700101491},
+  publisher = {Informa {UK} Limited},
+}
+
+@Article{Orkoulas1994,
+  author    = {Gerassimos Orkoulas and Athanassios Z. Panagiotopoulos},
+  title     = {Free energy and phase equilibria for the restricted primitive model of ionic fluids from Monte Carlo simulations},
+  journal   = {The Journal of Chemical Physics},
+  year      = {1994},
+  volume    = {101},
+  number    = {2},
+  pages     = {1452--1459},
+  month     = {jul},
+  doi       = {10.1063/1.467770},
+  publisher = {{AIP} Publishing},
+}
+
+@Article{Martin2013,
+  author    = {Marcus G. Martin},
+  title     = {{MCCCS} Towhee: a tool for Monte Carlo molecular simulation},
+  journal   = {Molecular Simulation},
+  year      = {2013},
+  volume    = {39},
+  number    = {14-15},
+  pages     = {1212--1222},
+  month     = {dec},
+  doi       = {10.1080/08927022.2013.828208},
+  publisher = {Informa {UK} Limited},
+}
+
+@Book{Allen1988,
+  title     = {Computer Simulation of Liquids},
+  publisher = {Oxford University Press},
+  year      = {1988},
+  author    = {M. P. Allen and D. J. Tildesley},
+  isbn      = {0198553757},
+  url       = {\url{https://www.amazon.com/Computer-Simulation-Liquids-M-Allen/dp/0198553757?SubscriptionId=AKIAIOBINVZYXZQZ2U3A&tag=chimbori05-20&linkCode=xm2&camp=2025&creative=165953&creativeASIN=0198553757}},
+}
+
+@Article{Lustig1998,
+  author    = {Rolf Lustig},
+  title     = {Microcanonical Monte Carlo simulation of thermodynamic properties},
+  journal   = {The Journal of Chemical Physics},
+  year      = {1998},
+  volume    = {109},
+  number    = {20},
+  pages     = {8816--8828},
+  month     = {nov},
+  doi       = {10.1063/1.477552},
+  publisher = {{AIP} Publishing},
+}
+
+@Misc{github_mcr,
+  url = {\url{https://github.com/MonteCarloRect/mcrec}},
+}
+
+@Article{Johnson1993,
+  author    = {J. Karl Johnson and John A. Zollweg and Keith E. Gubbins},
+  title     = {The Lennard-Jones equation of state revisited},
+  journal   = {Molecular Physics},
+  year      = {1993},
+  volume    = {78},
+  number    = {3},
+  pages     = {591--618},
+  month     = {feb},
+  doi       = {10.1080/00268979300100411},
+  publisher = {Informa {UK} Limited},
+}
+
+@Book{c,
+  title     = {Параллельные вычисления на GPU. Архитектура и программная модель CUDA: Учебное пособие.},
+  publisher = {Издательство МГУ Москва},
+  year      = {2015},
+  author    = {Боресков А.В., Харламов А.А., Марковский Н.Д., Микушин Д.Н., Мортиков Е.В., Мыльцев А.А., Сахарных Н.А., Фролов В.А.},
+  isbn      = {978-5-211-06340-2},
+}
+
+@Comment{jabref-meta: databaseType:bibtex;}

@@ -1,0 +1,36 @@
+\appendix
+\section{Приложение}
+% the \\ insures the section title is centered below the phrase: AppendixA
+
+Файлы проекта с описанием содержания (представлены только основные файлы проекта):
+\begin{itemize}
+	\item build --- тестовая сборка для отладки
+	\begin{itemize}
+		\item A.gro --- файл координат атомов в молекуле
+		\item data.mcr --- файл с параметрами моделирования
+		\item B.gro  --- файл координат атомов в молекуле 
+		\item data.top --- файл топологии молекул
+		
+	\end{itemize}
+	\item doc --- документация по проекту
+	\item initial --- моделирование входящих потоков
+	\begin{itemize}
+		\item data\_from\_device.cu --- перенос данных из видеокарты в хост
+		\item device\_prop.cu --- определение свойств видеокарты
+		\item initial\_flows.cu --- задание начальной конфигурации молекул во входящем потоке
+		\item read\_gro.cu  --- чтение gro файлов
+		\item read\_top.cu --- чтение top файлов
+		\item data\_to\_device.cu 	--- перенос данных из хоста в видеокарту
+		\item free\_arrays.cu --- освобождение памяти на видеокарте
+		\item rcut.cu --- вычисление добавки, связанной с обрезанием потенциала взаимодействия
+		\item read\_options.cu --- чтение параметров моделирования из файла 
+		\item single\_box.cu --- основной алгоритм метода Монте-Карло
+	\end{itemize}
+	\item write --- содержит файлы с выводом логов и выходных данных
+	\item CMakeLists.txt --- конфигурация для сборки Cmake
+	\item global.h --- глобальные константы
+	\item initial.h --- инициализация глобальных переменных программы
+	\item mcrec.cu --- основной файл программы (начало программы)
+	\item mcrec.h --- объявление новых типов структур
+		
+\end{itemize}

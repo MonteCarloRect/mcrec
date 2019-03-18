@@ -1,0 +1,57 @@
+This is BibTeX, Version 0.99d (TeX Live 2017/Debian)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: base.aux
+The style file: utf8gost71u.bst
+Database file #1: lib.bib.bib
+Too many commas in name 1 of "Боресков А.В., Харламов А.А., Марковский Н.Д., Микушин Д.Н., Мортиков Е.В., Мыльцев А.А., Сахарных Н.А., Фролов В.А." for entry cuda_book
+while executing---line 1521 of file utf8gost71u.bst
+Too many commas in name 1 of "Боресков А.В., Харламов А.А., Марковский Н.Д., Микушин Д.Н., Мортиков Е.В., Мыльцев А.А., Сахарных Н.А., Фролов В.А." for entry cuda_book
+while executing---line 1521 of file utf8gost71u.bst
+Too many commas in name 1 of "Боресков А.В., Харламов А.А., Марковский Н.Д., Микушин Д.Н., Мортиков Е.В., Мыльцев А.А., Сахарных Н.А., Фролов В.А." for entry cuda_book
+while executing---line 1521 of file utf8gost71u.bst
+Too many commas in name 1 of "Боресков А.В., Харламов А.А., Марковский Н.Д., Микушин Д.Н., Мортиков Е.В., Мыльцев А.А., Сахарных Н.А., Фролов В.А." for entry cuda_book
+while executing---line 1521 of file utf8gost71u.bst
+Too many commas in name 1 of "Боресков А.В., Харламов А.А., Марковский Н.Д., Микушин Д.Н., Мортиков Е.В., Мыльцев А.А., Сахарных Н.А., Фролов В.А." for entry cuda_book
+while executing---line 1521 of file utf8gost71u.bst
+You've used 19 entries,
+            2964 wiz_defined-function locations,
+            796 strings with 9160 characters,
+and the built_in function-call counts, 7072 in all, are:
+= -- 1020
+> -- 167
+< -- 28
++ -- 56
+- -- 37
+* -- 380
+:= -- 713
+add.period$ -- 76
+call.type$ -- 19
+change.case$ -- 0
+chr.to.int$ -- 0
+cite$ -- 19
+duplicate$ -- 314
+empty$ -- 598
+format.name$ -- 37
+if$ -- 1882
+int.to.chr$ -- 0
+int.to.str$ -- 19
+missing$ -- 0
+newline$ -- 127
+num.names$ -- 45
+pop$ -- 178
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 276
+stack$ -- 0
+substring$ -- 391
+swap$ -- 254
+text.length$ -- 13
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 0
+while$ -- 52
+width$ -- 21
+write$ -- 349
+(There were 5 error messages)

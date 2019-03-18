@@ -149,7 +149,7 @@ __global__ void single_calc(int yDim, gOptions gConf, gMolecula gTop, gSingleBox
 //        if(tempBlock > 6){
 //            equlibrated = true;
 //        }
-        //equlibrated = true;
+        equlibrated = true;
     }
     if(threadIdx.x == 0){
             printf("test ololo %d\n", equlibrated);
