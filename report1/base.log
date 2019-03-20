@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2018.10.12)  16 MAR 2019 01:46
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2018.10.12)  18 MAR 2019 23:32
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -2991,32 +2991,31 @@ File: fig/column.png Graphic file (type png)
 <use fig/column.png>
 Package pdftex.def Info: fig/column.png  used on input line 75.
 (pdftex.def)             Requested size: 338.58632pt x 297.86992pt.
-) (./prog.tex
+Package babel Info: Redefining russian shorthand "|
+(babel)             in language  on input line 90.
+Package babel Info: Redefining russian shorthand "~
+(babel)             in language  on input line 90.
+Package babel Info: Redefining russian shorthand "|
+(babel)             in language  on input line 90.
+Package babel Info: Redefining russian shorthand "~
+(babel)             in language  on input line 90.
+ [9 <./fig/column.png>]) (./prog.tex
 Package babel Info: Redefining russian shorthand "|
 (babel)             in language  on input line 1.
 Package babel Info: Redefining russian shorthand "~
 (babel)             in language  on input line 1.
 Package babel Info: Redefining russian shorthand "|
-(babel)             in language  on input line 3.
-Package babel Info: Redefining russian shorthand "~
-(babel)             in language  on input line 3.
-Package babel Info: Redefining russian shorthand "|
-(babel)             in language  on input line 3.
-Package babel Info: Redefining russian shorthand "~
-(babel)             in language  on input line 3.
- [9 <./fig/column.png>]
-Package babel Info: Redefining russian shorthand "|
 (babel)             in language  on input line 4.
 Package babel Info: Redefining russian shorthand "~
 (babel)             in language  on input line 4.
 Package babel Info: Redefining russian shorthand "|
-(babel)             in language  on input line 34.
+(babel)             in language  on input line 30.
 Package babel Info: Redefining russian shorthand "~
-(babel)             in language  on input line 34.
+(babel)             in language  on input line 30.
 Package babel Info: Redefining russian shorthand "|
-(babel)             in language  on input line 34.
+(babel)             in language  on input line 30.
 Package babel Info: Redefining russian shorthand "~
-(babel)             in language  on input line 34.
+(babel)             in language  on input line 30.
  [10]
 Overfull \hbox (16.73526pt too wide) in paragraph at lines 55--57
 [][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][] 
@@ -3062,17 +3061,17 @@ Package babel Info: Redefining russian shorthand "|
 Package babel Info: Redefining russian shorthand "~
 (babel)             in language  on input line 140.
 Package babel Info: Redefining russian shorthand "|
-(babel)             in language  on input line 144.
+(babel)             in language  on input line 143.
 Package babel Info: Redefining russian shorthand "~
-(babel)             in language  on input line 144.
+(babel)             in language  on input line 143.
 Package babel Info: Redefining russian shorthand "|
-(babel)             in language  on input line 144.
+(babel)             in language  on input line 143.
 Package babel Info: Redefining russian shorthand "~
-(babel)             in language  on input line 144.
+(babel)             in language  on input line 143.
 [13]
 
 LaTeX Warning: No positions in optional float specifier.
-               Default added (so using `tbp') on input line 145.
+               Default added (so using `tbp') on input line 144.
 
 ) (./appendix.tex
 Package babel Info: Redefining russian shorthand "|
@@ -3162,7 +3161,7 @@ Package rerunfilecheck Info: File `base.out' has not changed.
 Here is how much of TeX's memory you used:
  43172 strings out of 492982
  794463 string characters out of 6134895
- 1161529 words of memory out of 5000000
+ 1161530 words of memory out of 5000000
  45903 multiletter control sequences out of 15000+600000
  549833 words of font info for 67 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -3184,7 +3183,7 @@ hare/texmf/fonts/type1/public/cm-super/sfrm1200.pfb></usr/share/texmf/fonts/typ
 e1/public/cm-super/sfrm1440.pfb></usr/share/texmf/fonts/type1/public/cm-super/s
 frm1728.pfb></usr/share/texmf/fonts/type1/public/cm-super/sftt1200.pfb></usr/sh
 are/texmf/fonts/type1/public/cm-super/sfxc1095.pfb>
-Output written on base.pdf (16 pages, 369366 bytes).
+Output written on base.pdf (16 pages, 369460 bytes).
 PDF statistics:
  408 PDF objects out of 1000 (max. 8388607)
  343 compressed objects within 4 object streams
