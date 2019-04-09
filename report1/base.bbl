@@ -1,0 +1,158 @@
+\begin{thebibliography}{10}
+\def\selectlanguageifdefined#1{
+\expandafter\ifx\csname date#1\endcsname\relax
+\else\language\csname l@#1\endcsname\fi}
+\ifx\undefined\url\def\url#1{{\small #1}}\else\fi
+\ifx\undefined\BibUrl\def\BibUrl#1{\url{#1}}\else\fi
+\ifx\undefined\BibAnnote\long\def\BibAnnote#1{(#1)}\else\fi
+\ifx\undefined\BibEmph\def\BibEmph#1{\emph{#1}}\else\fi
+
+\bibitem{Skjold-Jorgensen1979}
+\selectlanguageifdefined{russian}
+Vapor-Liquid Equilibria by {UNIFAC} Group Contribution. Revision and
+  Extension~/ Steen~Skjold-Jorgensen, Barbel~Kolbe, Jurgen~Gmehling
+  {[и~др.]}~// Industrial {\&} Engineering Chemistry Process Design and
+  Development.
+\newblock 1979.  oct.
+\newblock Т.~18, {№}~4.
+\newblock {С.}~714--722.{}
+
+\bibitem{Tiegs1987}
+\selectlanguageifdefined{russian}
+Vapor-liquid equilibria by {UNIFAC} group contribution. 4. Revision and
+  extension~/ Detlef~Tiegs, Peter~Rasmussen, Juergen~Gmehling {[и~др.]}~//
+  Industrial {\&} Engineering Chemistry Research.
+\newblock 1987.  jan.
+\newblock Т.~26, {№}~1.
+\newblock {С.}~159--161.{}
+
+\bibitem{Wittig2003}
+\selectlanguageifdefined{russian}
+Wittig~Roland, Lohmann~Jürgen, Gmehling~Jürgen. Vapor-Liquid Equilibria by
+  {UNIFAC} Group Contribution. 6. Revision and Extension~// Industrial {\&}
+  Engineering Chemistry Research.
+\newblock 2003.  jan.
+\newblock Т.~42, {№}~1.
+\newblock {С.}~183--188.{}
+
+\bibitem{wiki_progs}
+\selectlanguageifdefined{russian}
+Comparison of software for molecular mechanics modeling. URL:
+  \url{https://en.wikipedia.org/wiki/Comparison_of_software_for_molecular_mechanics_modeling}.{}
+
+\bibitem{material_studio}
+\selectlanguageifdefined{russian}
+Materials Studio. URL:
+  \url{http://www.3dsbiovia.com/products/collaborative-science/biovia-materials-studio/}.{}
+
+\bibitem{shedinger}
+\selectlanguageifdefined{russian}
+Schr\"odinger Software. URL:
+  \url{https://www.schrodinger.com/suites/materials-science-suite}.{}
+
+\bibitem{Berendsen1995}
+\selectlanguageifdefined{russian}
+Berendsen~H.J.C., van~der Spoel~D., van Drunen~R. {GROMACS}: A message-passing
+  parallel molecular dynamics implementation~// Computer Physics
+  Communications.
+\newblock 1995.  sep.
+\newblock Т.~91, {№}~1-3.
+\newblock {С.}~43--56.{}
+
+\bibitem{Pronk2013}
+\selectlanguageifdefined{russian}
+{GROMACS} 4.5: a high-throughput and highly parallel open source molecular
+  simulation toolkit~/ Sander~Pronk, Szil{\'{a}}rd~P{\'{a}}ll, Roland~Schulz
+  {[и~др.]}~// Bioinformatics.
+\newblock 2013.  feb.
+\newblock Т.~29, {№}~7.
+\newblock {С.}~845--854.{}
+
+\bibitem{Abraham2015}
+\selectlanguageifdefined{russian}
+{GROMACS}: High performance molecular simulations through multi-level
+  parallelism from laptops to supercomputers~/ Mark~James~Abraham,
+  Teemu~Murtola, Roland~Schulz {[и~др.]}~// {SoftwareX}.
+\newblock 2015.  sep.
+\newblock Т. 1-2.
+\newblock {С.}~19--25.{}
+
+\bibitem{Plimpton1995}
+\selectlanguageifdefined{russian}
+Plimpton~Steve. Fast Parallel Algorithms for Short-Range Molecular Dynamics~//
+  Journal of Computational Physics.
+\newblock 1995.  mar.
+\newblock Т. 117, {№}~1.
+\newblock {С.}~1--19.{}
+
+\bibitem{Thompson2009}
+\selectlanguageifdefined{russian}
+Thompson~Aidan~P., Plimpton~Steven~J., Mattson~William. General formulation of
+  pressure and stress tensor for arbitrary many-body interaction potentials
+  under periodic boundary conditions~// The Journal of Chemical Physics.
+\newblock 2009.  oct.
+\newblock Т. 131, {№}~15.
+\newblock {С.}~154107.{}
+
+\bibitem{Panagiotopoulos1987}
+\selectlanguageifdefined{russian}
+Panagiotopoulos~Athanassios~Z. Direct determination of phase coexistence
+  properties of fluids by Monte Carlo simulation in a new ensemble~// Molecular
+  Physics.
+\newblock 1987.  jul.
+\newblock Т.~61, {№}~4.
+\newblock {С.}~813--826.{}
+
+\bibitem{Orkoulas1994}
+\selectlanguageifdefined{russian}
+Orkoulas~Gerassimos, Panagiotopoulos~Athanassios~Z. Free energy and phase
+  equilibria for the restricted primitive model of ionic fluids from Monte
+  Carlo simulations~// The Journal of Chemical Physics.
+\newblock 1994.  jul.
+\newblock Т. 101, {№}~2.
+\newblock {С.}~1452--1459.{}
+
+\bibitem{Martin2013}
+\selectlanguageifdefined{russian}
+Martin~Marcus~G. {MCCCS} Towhee: a tool for Monte Carlo molecular simulation~//
+  Molecular Simulation.
+\newblock 2013.  dec.
+\newblock Т.~39, {№}~14-15.
+\newblock {С.}~1212--1222.{}
+
+\bibitem{Allen1988}
+\selectlanguageifdefined{russian}
+Allen~M.~P., Tildesley~D.~J. Computer Simulation of Liquids.
+\newblock Oxford University Press, 1988. URL:
+  \url{https://www.amazon.com/Computer-Simulation-Liquids-M-Allen/dp/0198553757?SubscriptionId=AKIAIOBINVZYXZQZ2U3A&tag=chimbori05-20&linkCode=xm2&camp=2025&creative=165953&creativeASIN=0198553757}.{}
+
+\bibitem{Lustig1998}
+\selectlanguageifdefined{russian}
+Lustig~Rolf. Microcanonical Monte Carlo simulation of thermodynamic
+  properties~// The Journal of Chemical Physics.
+\newblock 1998.  nov.
+\newblock Т. 109, {№}~20.
+\newblock {С.}~8816--8828.{}
+
+\bibitem{github_mcr}
+\selectlanguageifdefined{russian}
+ URL:  \url{https://github.com/MonteCarloRect/mcrec}.{}
+
+\bibitem{cuda_book}
+\selectlanguageifdefined{russian}
+Боресков~А.В.~Харламов~А.А.~Марковский Н.Д.
+  Микушин Д.Н. Мортиков Е.В. Мыльцев А.А.
+  Сахарных Н.А. Фролов~В.А. Параллельные
+  вычисления на GPU. Архитектура и
+  программная модель CUDA: Учебное пособие.
+\newblock Издательство МГУ Москва, 2015.{}
+
+\bibitem{Johnson1993}
+\selectlanguageifdefined{russian}
+Johnson~J.~Karl, Zollweg~John~A., Gubbins~Keith~E. The Lennard-Jones equation
+  of state revisited~// Molecular Physics.
+\newblock 1993.  feb.
+\newblock Т.~78, {№}~3.
+\newblock {С.}~591--618.{}
+
+\end{thebibliography}

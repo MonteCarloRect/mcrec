@@ -1,0 +1,102 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[left=2.5cm, top=2cm, right=1.5cm, bottom=2cm]{geometry}
+
+%%% Работа с русским языком
+\usepackage{cmap}					% поиск в PDF
+\usepackage{mathtext} 				% русские буквы в формулах
+\usepackage[T2A]{fontenc}			% кодировка
+\usepackage[utf8]{inputenc}			% кодировка исходного текста
+\usepackage[english,russian]{babel}	% ло кализация и переносы
+%%\usepackage{textcomp}
+
+%%% Дополнительная работа с математикой
+\usepackage{amsmath,amsfonts,amssymb,amsthm,mathtools} 
+%\usepackage{textcomp}
+
+%% Номера формул
+\usepackage{xymtexpdf}
+\usepackage{chmst-pdf}
+
+%%% Работа с картинками
+\usepackage{graphicx}  % Для вставки рисунков
+\usepackage{rotating}
+\setlength\fboxsep{3pt} % Отступ рамки \fbox{} от рисунка
+\setlength\fboxrule{1pt} % Толщина линий рамки \fbox{}
+\usepackage{wrapfig} % Обтекание рисунков текстом
+
+%%% Работа с таблицами
+\usepackage{array,tabularx,tabulary,booktabs} % Дополнительная работа с таблицами
+\usepackage{longtable}  % Длинные таблицы
+\usepackage{multirow} % Слияние строк в таблице
+
+
+%%% Программирование
+
+%%%tikz
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usetikzlibrary{patterns}
+\usetikzlibrary{shadows}
+\usepackage{indentfirst} % Красная строка
+
+
+\usepackage[os=win, mackeys=symbols]{menukeys}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage[russian,noabbrev]{cleveref}
+
+\graphicspath{{fig/}}
+
+\usepackage{lastpage}
+\usepackage{fancyhdr}
+
+
+\usepackage{xassoccnt}
+\NewTotalDocumentCounter{totalfigures}
+\NewTotalDocumentCounter{totaltables}
+\NewTotalDocumentCounter{appendixchapters}
+\DeclareAssociatedCounters{figure}{totalfigures}
+\DeclareAssociatedCounters{table}{totaltables}
+\NewTotalDocumentCounter{totalpages}
+\NewDocumentCounter{realpages}
+\DeclareAssociatedCounters{page}{totalpages}
+
+\makeatletter
+\AtBeginDocument{%
+	\stepcounter{realpages}%
+}
+\EveryShipout{%
+	\stepcounter{realpages}%
+}
+\AtEndDocument{%
+	\setcounter{xassoccnt@total@totalpages}{\value{realpages}}%
+	\write\@auxout{%
+		\string\setcounter{xassoccnt@total@totalpages}{\number\value{realpages}}%
+	}
+}
+\makeatother
+
+
+\usepackage{listings}
+\usepackage{color}
+
+\usepackage[toc,page]{appendix}
+
+%%% Заголовок
+\author{Ivan Anashkin}
+\title{rfbr}
+\date{\today}
+
+\begin{document}
+\input{title.tex}
+
+	
+\input{introduction.tex}
+\input{theory.tex}
+\input{prog.tex}
+\input{appendix.tex}
+%\newpage
+\addcontentsline{toc}{section}{\bibname}
+\bibliographystyle{utf8gost71u}  
+\bibliography{lib.bib}
+\end{document}
