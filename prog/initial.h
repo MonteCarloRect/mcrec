@@ -28,3 +28,9 @@ gMolecula gTop;
 //time
 time_t beginTime;
 time_t endTime;
+
+//double box
+hDoubleBox doubleBox; //host data of plates (stucted)
+gDoublebox gDBox;   //devicex data of plates
+gDoublebox hDBox;   //host data of plates (not structed)
+

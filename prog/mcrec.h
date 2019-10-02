@@ -24,12 +24,16 @@ extern struct options{
     float* flowT;   //flow temperature
     float* flowN;   //flow density [mol/l]
     float* flowP;   //flow pressure [bar]
-    int* flowIns;
+    int** flowIns;  //flow molecules  inserted by substance
     float** flowX;
     int mixRule;    //mixrule
     int singleXDim; //y dimension of threads
     int singleYDim; //y dimension of threads
     
+    int plateNum;   //numbers of plates
+    int* plateIn;   //number of input flows plates
+    float plateVol; //plates volume
+    int plateInit;  //initial state of plates
     //
     int potNum; //numbers of potential parameters
 } config;
@@ -101,6 +105,41 @@ typedef struct{
     float charge;
 } mixParam;
 
+typedef struct{
+    int* molNum;    //number of molecules in plate
+    int** molNumType;    //numbers of molecules of each type
+    
+    int* state; //1 -- liquid 2 -- vapor
+    float* liqVol;    //volume of liquid box
+    float* vapVol;    //volume of vapor box
+    
+    float* refEnergy;   //reference energy of plate
+    
+    //float* liqEnergy;   //current energy of liquid phase
+    
+    float** xm;
+    float** ym;
+    float** zm;
+    float** mType;  //type of molecules
+    int* nLiq;  //number of molecules in liquid phase (per plate)
+    int* nVap;  //numbers of molecules in vapor phase (per plate)
+    
+    int** liqList;   //list of liquid molecules per plate
+    int** vapList;  //list of vapor molecules per plate
+    
+    
+    float*** xa;
+    float*** ya;
+    float*** za;
+    
+    int** type; //type of molecules
+    
+    int* plateDevice;    //number of device for plate
+    int* devicePlates;  //numbers of plates per device
+    int** platesPerDevice; //array of plates number per device
+    
+} hDoubleBox;
+
 //GPU structures
 typedef struct{
     float* xm;
@@ -165,6 +204,30 @@ typedef struct{
     float* pressureCorr;
 } gSingleBox;
 
+
+typedef struct{
+    int* pltNum;    //total numbers of plate
+
+    int* molNum;    //total numbers of molecules per plate
+    int* molNumType;    //total number of molecules by type per plate
+    
+    float* xm;
+    float* ym;
+    float* zm;
+    
+    float* xa;
+    float* ya;
+    float* za;
+    
+    int* mType;
+    int* nLiq;
+    int* nVap;
+    
+    int* aType;
+    
+    
+} gDoublebox;
+
 typedef struct{ //topology
     int* aNum;  //numbers of atom in molecule
     int* aType;    //type of atom in molecule
@@ -188,9 +251,9 @@ typedef struct{ //config
     int* potNum;
     float* Temp;
     
-
     
 } gOptions;
+
 
 //    int vaporNum;   //molecules in vapor phase
 //    int liquidNum;  //molecules in liquid phase
@@ -230,6 +293,10 @@ __device__ int intra_potential(int a, gOptions gConf, gMolecula gTop, gSingleBox
 
 int data_from_device(gSingleBox &gData, gSingleBox &hData, options config);
 int write_singlebox_log(FILE* logFile, gSingleBox &hData);
+
+int plates_initial_state(options &config, hDoubleBox &doubleBox, gSingleBox &hostData, molecules* initMol, int deviceCount);
+int double_box_init_allocate(options &config, hDoubleBox &doubleBox, int deviceCount);
+int double_box_host_to_device(options &config, hDoubleBox &doubleBox, gDoublebox gDBox, gDoublebox hDBox, gSingleBox &hostData, molecules* initMol, int deviceCount);
 
 #endif
 //

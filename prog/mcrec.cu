@@ -52,6 +52,15 @@ int main (int argc, char * argv[]){
     rcut(hostData, config, hostTop, initMol, hostConf);
     //print out results
     write_singlebox_log(logFile, hostData);
+    
+    //Double box
+    //initial inserting of molecules
+    
+    //push data to devices
+    
+    //start cycle
+    
+    
 //close log file
     freeAll(gpuSingleBox,initFlows,config);
     fclose(logFile);
@@ -59,4 +68,11 @@ int main (int argc, char * argv[]){
     time(&endTime);
     printf("end time %s\n", asctime(localtime(&endTime))); 
     printf("elapsed time %f sec", difftime(endTime, beginTime));
+    
+    //generate initial stata on plates
+    plates_initial_state(config, doubleBox, hostData, initMol, deviceCount);
+    //int double_box_init_allocate(options &config, hDoubleBox &doubleBox, int deviceCount);
+    double_box_init_allocate(config, doubleBox, deviceCount);
+    //int double_box_host_to_device(options &config, hDoubleBox &doubleBox, gDoublebox gDBox, gDoublebox hDBox, gSingleBox &hostData, molecules* initMol, int deviceCount)
+    double_box_host_to_device(config, doubleBox, gDBox, hDBox, hostData, initMol, deviceCount);
 }
