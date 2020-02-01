@@ -214,6 +214,15 @@ int read_options(options &config){
                     printf("Flow  %d Number of plate %d\n", i, config.plateIn[i]);
                 }
             }
+            if(strstr(rString,"plates_insertion") != NULL){
+                if(strstr(lString,"true") != NULL){
+                    config.platesInsertion = true;
+                }
+                if(strstr(lString,"false") != NULL){
+                    config.platesInsertion = false;
+                }
+                printf("Molecules insertion: %d\n", config.platesInsertion);
+            }
             
         }
 //        if(rString) = 

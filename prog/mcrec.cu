@@ -75,4 +75,6 @@ int main (int argc, char * argv[]){
     double_box_init_allocate(config, doubleBox, deviceCount);
     //int double_box_host_to_device(options &config, hDoubleBox &doubleBox, gDoublebox gDBox, gDoublebox hDBox, gSingleBox &hostData, molecules* initMol, int deviceCount)
     double_box_host_to_device(config, doubleBox, gDBox, hDBox, hostData, initMol, deviceCount);
+    printf("%f - %f\n", hDBox.xa[0], hDBox.xm[0]);
+    printf("Done\n");
 }
