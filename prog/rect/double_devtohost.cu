@@ -9,28 +9,31 @@
 
 
 //transfer data from host to devices
-int double_box_host_to_device(options &config, hDoubleBox &doubleBox, gDoublebox &gDBox, gDoublebox &hDBox, gSingleBox &hostData, molecules* initMol, int deviceCount){
+int double_box_host_to_device(options &config, hDoubleBox &doubleBox, gDoublebox* &gDBox, gDoublebox &hDBox, gSingleBox &hostData, molecules* initMol, int deviceCount){
     cudaError_t cuErr;
     int sum;
     int sum2;
     int id;
     int id2;
     
-    for(int curDev = 0; curDev < deviceCount; curDev++){
+    
+    
+    for(int curDev = 0; curDev > deviceCount; curDev++){
         cuErr = cudaSetDevice(curDev);  //set to current device
         if(cuErr != cudaSuccess){
             printf("Cannot swtich to device %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
+        //printf("cuda set device \n");
         //allocate total number of plates
         hDBox.pltNum = (int*) malloc(deviceCount * sizeof(int));
         for(int i = 0; i < deviceCount; i++){
             hDBox.pltNum[i] = doubleBox.devicePlates[i];
         }
-        cuErr = cudaMalloc(&gDBox.pltNum, deviceCount*sizeof(int));
+        cuErr = cudaMalloc(&gDBox[curDev].pltNum, deviceCount*sizeof(int));
         if(cuErr != cudaSuccess){
-            printf("Cannot allocate gDBox.molNum %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+            printf("Cannot allocate gDBox[curDev].molNum %s line %d, err: %s, device %d\n", __FILE__, __LINE__, cudaGetErrorString(cuErr), curDev);
         }
-        cuErr = cudaMemcpy(gDBox.pltNum, hDBox.pltNum, deviceCount*sizeof(int), cudaMemcpyHostToDevice);
+        cuErr = cudaMemcpy(gDBox[curDev].pltNum, hDBox.pltNum, deviceCount * sizeof(int), cudaMemcpyHostToDevice);
         if(cuErr != cudaSuccess){
             printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
@@ -42,11 +45,11 @@ int double_box_host_to_device(options &config, hDoubleBox &doubleBox, gDoublebox
         for(int i = 0; i < doubleBox.devicePlates[curDev]; i++){
             hDBox.molNum[i] = doubleBox.molNum[doubleBox.platesPerDevice[curDev][i]];
         }
-        cuErr = cudaMalloc(&gDBox.molNum, doubleBox.devicePlates[curDev] * sizeof(int));
+        cuErr = cudaMalloc(&gDBox[curDev].molNum, doubleBox.devicePlates[curDev] * sizeof(int));
         if(cuErr != cudaSuccess){
-            printf("Cannot allocate gDBox.molNum %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+            printf("Cannot allocate gDBox[curDev].molNum %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
-        cuErr = cudaMemcpy(gDBox.molNum, hDBox.molNum, deviceCount*sizeof(int), cudaMemcpyHostToDevice);
+        cuErr = cudaMemcpy(gDBox[curDev].molNum, hDBox.molNum, deviceCount*sizeof(int), cudaMemcpyHostToDevice);
         if(cuErr != cudaSuccess){
             printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
@@ -72,19 +75,19 @@ int double_box_host_to_device(options &config, hDoubleBox &doubleBox, gDoublebox
             hDBox.nVap[i] = doubleBox.nVap[doubleBox.platesPerDevice[curDev][i]];
             hDBox.nLiq[i] = doubleBox.nLiq[doubleBox.platesPerDevice[curDev][i]];
         }
-        cuErr = cudaMalloc(&gDBox.nVap, doubleBox.devicePlates[curDev] * sizeof(int));
+        cuErr = cudaMalloc(&gDBox[curDev].nVap, doubleBox.devicePlates[curDev] * sizeof(int));
         if(cuErr != cudaSuccess){
-            printf("Cannot allocate gDBox.nVap %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+            printf("Cannot allocate gDBox[curDev].nVap %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
-        cuErr = cudaMalloc(&gDBox.nLiq, doubleBox.devicePlates[curDev] * sizeof(int));
+        cuErr = cudaMalloc(&gDBox[curDev].nLiq, doubleBox.devicePlates[curDev] * sizeof(int));
         if(cuErr != cudaSuccess){
-            printf("Cannot allocate gDBox.nLiq %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+            printf("Cannot allocate gDBox[curDev].nLiq %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
-        cuErr = cudaMemcpy(gDBox.nVap, hDBox.nVap, doubleBox.devicePlates[curDev] * sizeof(int), cudaMemcpyHostToDevice);
+        cuErr = cudaMemcpy(gDBox[curDev].nVap, hDBox.nVap, doubleBox.devicePlates[curDev] * sizeof(int), cudaMemcpyHostToDevice);
         if(cuErr != cudaSuccess){
             printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
-        cuErr = cudaMemcpy(gDBox.nLiq, hDBox.nLiq, doubleBox.devicePlates[curDev] * sizeof(int), cudaMemcpyHostToDevice);
+        cuErr = cudaMemcpy(gDBox[curDev].nLiq, hDBox.nLiq, doubleBox.devicePlates[curDev] * sizeof(int), cudaMemcpyHostToDevice);
         if(cuErr != cudaSuccess){
             printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
@@ -95,50 +98,50 @@ int double_box_host_to_device(options &config, hDoubleBox &doubleBox, gDoublebox
         hDBox.za = (float*) malloc(sum2 * sizeof(float));
         
         //allocate GPU molecules data
-        cuErr = cudaMalloc(&gDBox.xm, sum * sizeof(float));
+        cuErr = cudaMalloc(&gDBox[curDev].xm, sum * sizeof(float));
         if(cuErr != cudaSuccess){
-            printf("Cannot allocate gDBox.xm %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+            printf("Cannot allocate gDBox[curDev].xm %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
-        cuErr = cudaMalloc(&gDBox.ym, sum * sizeof(float));
+        cuErr = cudaMalloc(&gDBox[curDev].ym, sum * sizeof(float));
         if(cuErr != cudaSuccess){
-            printf("Cannot allocate gDBox.ym %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+            printf("Cannot allocate gDBox[curDev].ym %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
-        cuErr = cudaMalloc(&gDBox.zm, sum * sizeof(float));
+        cuErr = cudaMalloc(&gDBox[curDev].zm, sum * sizeof(float));
         if(cuErr != cudaSuccess){
-            printf("Cannot allocate gDBox.zm %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+            printf("Cannot allocate gDBox[curDev].zm %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
-        cuErr = cudaMalloc(&gDBox.mType, sum * sizeof(int));
+        cuErr = cudaMalloc(&gDBox[curDev].mType, sum * sizeof(int));
         if(cuErr != cudaSuccess){
-            printf("Cannot allocate gDBox.mType %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+            printf("Cannot allocate gDBox[curDev].mType %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
         
         //allocate GPU atoms data
-        cuErr = cudaMalloc(&gDBox.xa, sum2 * sizeof(int));
+        cuErr = cudaMalloc(&gDBox[curDev].xa, sum2 * sizeof(int));
         if(cuErr != cudaSuccess){
-            printf("Cannot allocate gDBox.xa %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+            printf("Cannot allocate gDBox[curDev].xa %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
-        cuErr = cudaMalloc(&gDBox.ya, sum2 * sizeof(int));
+        cuErr = cudaMalloc(&gDBox[curDev].ya, sum2 * sizeof(int));
         if(cuErr != cudaSuccess){
-            printf("Cannot allocate gDBox.ya %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+            printf("Cannot allocate gDBox[curDev].ya %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
-        cuErr = cudaMalloc(&gDBox.za, sum2 * sizeof(int));
+        cuErr = cudaMalloc(&gDBox[curDev].za, sum2 * sizeof(int));
         if(cuErr != cudaSuccess){
-            printf("Cannot allocate gDBox.za %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+            printf("Cannot allocate gDBox[curDev].za %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
         
         //allocate first molecules and first atoms
         hDBox.fMolOnPlate = (int*) malloc(doubleBox.devicePlates[curDev] * sizeof(int));
         hDBox.fAtomOfMol = (int*) malloc(sum * sizeof(int));
-        cuErr = cudaMalloc(&gDBox.fMolOnPlate, doubleBox.devicePlates[curDev] * sizeof(int));
+        cuErr = cudaMalloc(&gDBox[curDev].fMolOnPlate, doubleBox.devicePlates[curDev] * sizeof(int));
         if(cuErr != cudaSuccess){
-            printf("Cannot allocate gDBox.fMolOnPlate %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+            printf("Cannot allocate gDBox[curDev].fMolOnPlate %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
-        cuErr = cudaMalloc(&gDBox.fAtomOfMol, sum * sizeof(int));
+        cuErr = cudaMalloc(&gDBox[curDev].fAtomOfMol, sum * sizeof(int));
         if(cuErr != cudaSuccess){
-            printf("Cannot allocate gDBox.fAtomOfMol %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+            printf("Cannot allocate gDBox[curDev].fAtomOfMol %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
         //printf("test21-1 \n");
-        //calculate first molecules index in plate\u00d1
+        //calculate first molecules index in plate
         id = 0; //set to zero index for each device for molecule
         id2 = 0;    //set to zero index for each first atopm in molecule
         for(int i = 0; i < doubleBox.devicePlates[curDev]; i++){
@@ -164,13 +167,13 @@ int double_box_host_to_device(options &config, hDoubleBox &doubleBox, gDoublebox
         //set liquid/vapor lists
         hDBox.liqList = (int*) malloc(sum * sizeof(int));
         hDBox.vapList = (int*) malloc(sum * sizeof(int));
-        cuErr = cudaMalloc(&gDBox.liqList, sum * sizeof(int));
+        cuErr = cudaMalloc(&gDBox[curDev].liqList, sum * sizeof(int));
         if(cuErr != cudaSuccess){
-            printf("Cannot allocate gDBox.liqList %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+            printf("Cannot allocate gDBox[curDev].liqList %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
-        cuErr = cudaMalloc(&gDBox.vapList, sum * sizeof(int));
+        cuErr = cudaMalloc(&gDBox[curDev].vapList, sum * sizeof(int));
         if(cuErr != cudaSuccess){
-            printf("Cannot allocate gDBox.vapList %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+            printf("Cannot allocate gDBox[curDev].vapList %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
         id = 0;
         for(int i = 0; i < doubleBox.devicePlates[curDev]; i++){    //over plates
@@ -186,37 +189,37 @@ int double_box_host_to_device(options &config, hDoubleBox &doubleBox, gDoublebox
         
         //printf("test21-3 \n");
         //copy molecules data to GPU
-        cuErr = cudaMemcpy(gDBox.xm, hDBox.xm, sum * sizeof(float), cudaMemcpyHostToDevice);
+        cuErr = cudaMemcpy(gDBox[curDev].xm, hDBox.xm, sum * sizeof(float), cudaMemcpyHostToDevice);
         if(cuErr != cudaSuccess){
             printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
-        cuErr = cudaMemcpy(gDBox.ym, hDBox.ym, sum * sizeof(float), cudaMemcpyHostToDevice);
+        cuErr = cudaMemcpy(gDBox[curDev].ym, hDBox.ym, sum * sizeof(float), cudaMemcpyHostToDevice);
         if(cuErr != cudaSuccess){
             printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
-        cuErr = cudaMemcpy(gDBox.zm, hDBox.zm, sum * sizeof(float), cudaMemcpyHostToDevice);
+        cuErr = cudaMemcpy(gDBox[curDev].zm, hDBox.zm, sum * sizeof(float), cudaMemcpyHostToDevice);
         if(cuErr != cudaSuccess){
             printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
         //copy first atoms
-        cuErr = cudaMemcpy(gDBox.fMolOnPlate, hDBox.fMolOnPlate, doubleBox.devicePlates[curDev]*sizeof(int), cudaMemcpyHostToDevice);
+        cuErr = cudaMemcpy(gDBox[curDev].fMolOnPlate, hDBox.fMolOnPlate, doubleBox.devicePlates[curDev]*sizeof(int), cudaMemcpyHostToDevice);
         if(cuErr != cudaSuccess){
             printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
-        cuErr = cudaMemcpy(gDBox.fAtomOfMol, hDBox.fMolOnPlate, sum * sizeof(int), cudaMemcpyHostToDevice);
+        cuErr = cudaMemcpy(gDBox[curDev].fAtomOfMol, hDBox.fMolOnPlate, sum * sizeof(int), cudaMemcpyHostToDevice);
         if(cuErr != cudaSuccess){
             printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
         //copy atoms to GPU
-        cuErr = cudaMemcpy(gDBox.xa, hDBox.xa, sum2 * sizeof(float), cudaMemcpyHostToDevice);
+        cuErr = cudaMemcpy(gDBox[curDev].xa, hDBox.xa, sum2 * sizeof(float), cudaMemcpyHostToDevice);
         if(cuErr != cudaSuccess){
             printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
-        cuErr = cudaMemcpy(gDBox.ya, hDBox.xa, sum2 * sizeof(float), cudaMemcpyHostToDevice);
+        cuErr = cudaMemcpy(gDBox[curDev].ya, hDBox.xa, sum2 * sizeof(float), cudaMemcpyHostToDevice);
         if(cuErr != cudaSuccess){
             printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
-        cuErr = cudaMemcpy(gDBox.za, hDBox.xa, sum2 * sizeof(float), cudaMemcpyHostToDevice);
+        cuErr = cudaMemcpy(gDBox[curDev].za, hDBox.xa, sum2 * sizeof(float), cudaMemcpyHostToDevice);
         if(cuErr != cudaSuccess){
             printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
@@ -225,14 +228,66 @@ int double_box_host_to_device(options &config, hDoubleBox &doubleBox, gDoublebox
         for(int i = 0; i < config.plateNum; i++){
             hDBox.eqStep[i] = 0;
         }        
-        cuErr = cudaMalloc(&gDBox.eqStep, config.plateNum * sizeof(int));
+        cuErr = cudaMalloc(&gDBox[curDev].eqStep, config.plateNum * sizeof(int));
         if(cuErr != cudaSuccess){
-            printf("Cannot allocate gDBox.liqList %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+            printf("Cannot allocate gDBox[curDev].liqList %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
-        cuErr = cudaMemcpy(gDBox.eqStep, hDBox.eqStep, config.plateNum * sizeof(int), cudaMemcpyHostToDevice);
+        cuErr = cudaMemcpy(gDBox[curDev].eqStep, hDBox.eqStep, config.plateNum * sizeof(int), cudaMemcpyHostToDevice);
         if(cuErr != cudaSuccess){
             printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
+        
+        //phases volumes
+        hDBox.liqVol = (float*) malloc(doubleBox.devicePlates[curDev] * sizeof(float));
+        for(int i = 0; i < doubleBox.devicePlates[curDev]; i++){
+            hDBox.liqVol[i] = doubleBox.liqVol[doubleBox.platesPerDevice[curDev][i]];
+        }
+        cuErr = cudaMalloc(&gDBox[curDev].liqVol, doubleBox.devicePlates[curDev] * sizeof(float));
+        if(cuErr != cudaSuccess){
+            printf("Cannot allocate gDBox[curDev].nVap %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
+        cuErr = cudaMemcpy(gDBox[curDev].liqVol, hDBox.liqVol, doubleBox.devicePlates[curDev] * sizeof(float), cudaMemcpyHostToDevice);
+        if(cuErr != cudaSuccess){
+            printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
+        hDBox.vapVol = (float*) malloc(doubleBox.devicePlates[curDev] * sizeof(float));
+        for(int i = 0; i < doubleBox.devicePlates[curDev]; i++){
+            hDBox.vapVol[i] = doubleBox.vapVol[doubleBox.platesPerDevice[curDev][i]];
+        }
+        cuErr = cudaMalloc(&gDBox[curDev].vapVol, doubleBox.devicePlates[curDev] * sizeof(float));
+        if(cuErr != cudaSuccess){
+            printf("Cannot allocate gDBox[curDev].vapVol %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
+        cuErr = cudaMemcpy(gDBox[curDev].vapVol, hDBox.vapVol, doubleBox.devicePlates[curDev] * sizeof(float), cudaMemcpyHostToDevice);
+        if(cuErr != cudaSuccess){
+            printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
+        //phases cut radius
+        hDBox.liqRcut = (float*) malloc(doubleBox.devicePlates[curDev] * sizeof(float));
+        for(int i = 0; i < doubleBox.devicePlates[curDev]; i++){
+            hDBox.liqRcut[i] = pow(doubleBox.liqVol[doubleBox.platesPerDevice[curDev][i]],1.0/3.0);
+        }
+        cuErr = cudaMalloc(&gDBox[curDev].liqRcut, doubleBox.devicePlates[curDev] * sizeof(float));
+        if(cuErr != cudaSuccess){
+            printf("Cannot allocate gDBox[curDev].liqRcut %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
+        cuErr = cudaMemcpy(gDBox[curDev].liqRcut, hDBox.liqRcut, doubleBox.devicePlates[curDev] * sizeof(float), cudaMemcpyHostToDevice);
+        if(cuErr != cudaSuccess){
+            printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
+        hDBox.vapRcut = (float*) malloc(doubleBox.devicePlates[curDev] * sizeof(float));
+        for(int i = 0; i < doubleBox.devicePlates[curDev]; i++){
+            hDBox.vapRcut[i] = pow(doubleBox.vapVol[doubleBox.platesPerDevice[curDev][i]], 1.0/3.0);
+        }
+        cuErr = cudaMalloc(&gDBox[curDev].vapRcut, doubleBox.devicePlates[curDev] * sizeof(float));
+        if(cuErr != cudaSuccess){
+            printf("Cannot allocate gDBox[curDev].vapRcut %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
+        cuErr = cudaMemcpy(gDBox[curDev].vapRcut, hDBox.vapRcut, doubleBox.devicePlates[curDev] * sizeof(float), cudaMemcpyHostToDevice);
+        if(cuErr != cudaSuccess){
+            printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
+        
         
         //free host arrays
         free(hDBox.pltNum);
@@ -250,6 +305,11 @@ int double_box_host_to_device(options &config, hDoubleBox &doubleBox, gDoublebox
         free(hDBox.fAtomOfMol);
         free(hDBox.liqList);
         free(hDBox.vapList);
+        free(hDBox.eqStep);
+        free(hDBox.vapVol);
+        free(hDBox.vapRcut);
+        free(hDBox.liqVol);
+        free(hDBox.liqRcut);
         printf("\n free %d done\n", curDev);
     }
     

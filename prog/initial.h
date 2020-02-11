@@ -22,8 +22,8 @@ gOptions hostConf;
 //GPU data
 cudaError_t cuErr;
 gSingleBox gBox;
-gOptions gConf;
-gMolecula gTop;
+gOptions* gConf;
+gMolecula* gTop;
 
 //time
 time_t beginTime;
@@ -31,6 +31,6 @@ time_t endTime;
 
 //double box
 hDoubleBox doubleBox; //host data of plates (stucted)
-gDoublebox gDBox;   //devicex data of plates
+gDoublebox* gDBox;   //devicex data of plates   (array for each device)
 gDoublebox hDBox;   //host data of plates (not structed)
 

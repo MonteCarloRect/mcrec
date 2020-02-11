@@ -111,10 +111,6 @@ if(config.plateInit == VAK){    //vakuum at all plates
 //            }
 //        }
     }
-    //allocate arrays of vapor phase
-    
-    //allocate arrays of liquid phase
-    //printf("\n test 3 \n");
     
     volFrac = 0.1;  //fraction of liquid phase
     //molecules inserted
@@ -157,6 +153,7 @@ if(config.plateInit == VAK){    //vakuum at all plates
                     doubleBox.zm[i][id] = tempZm[randMol];
                     doubleBox.mType[i][id] = j; //set type of molecules
                     doubleBox.liqList[i][id] = id;  //set current molecule to liquid phase
+                    //doubleBox.nLiq[i]++;    //add one more molecule to liquid phase
                     //doubleBox.nVap[i]++;    //summ molecules DO THIS UPPER
                     
                     doubleBox.xa[i][id] = (float*) malloc(initMol[j].atomNum * sizeof(float));

@@ -21,6 +21,25 @@ int main (int argc, char * argv[]){
         return 1;
     }
     write_prop_log(deviceCount, deviceProp, logFile);
+    //
+//    cuErr = cudaMalloc(&gDBox, deviceCount * sizeof(gDoublebox));
+//    if(cuErr != cudaSuccess){
+//        printf("Cannot allocate gDBox %s line %d, err: %s, device %d\n", __FILE__, __LINE__, cudaGetErrorString(cuErr), deviceCount);
+//    }
+//    cuErr = cudaMalloc(&gConf, deviceCount * sizeof(gOptions));
+//    if(cuErr != cudaSuccess){
+//        printf("Cannot allocate gConf %s line %d, err: %s, device %d\n", __FILE__, __LINE__, cudaGetErrorString(cuErr), deviceCount);
+//    }
+//    cuErr = cudaMalloc(&gTop, deviceCount * sizeof(gMolecula));
+//    if(cuErr != cudaSuccess){
+//        printf("Cannot allocate gConf %s line %d, err: %s, device %d\n", __FILE__, __LINE__, cudaGetErrorString(cuErr), deviceCount);
+//    }
+    
+    gConf = (gOptions*) malloc(deviceCount * sizeof(gOptions));
+    gTop = (gMolecula*) malloc(deviceCount * sizeof(gMolecula));
+    gDBox = (gDoublebox*) malloc(deviceCount * sizeof(gDoublebox)); //allocate GPU data
+    
+    
     //read initial data
     read_options(config);
     write_config_log(config,logFile);
@@ -36,13 +55,13 @@ int main (int argc, char * argv[]){
     //create initial simulation
     initial_flows(config, initFlows, initMol, gpuSingleBox, paramsLines, allParams, gpuParams, hostParams, gpuMixParams, hostMixParams, deviceProp);
     //copy data to GPU device
-    data_to_device(gBox, initFlows, gConf, config, gTop, hostParams, initMol, hostData, hostTop, hostConf);
+    data_to_device(gBox, initFlows, gConf, config, gTop, hostParams, initMol, hostData, hostTop, hostConf, deviceCount);
     cuErr = cudaGetLastError();
     printf("Cuda data2device last error: %s\n", cudaGetErrorString(cuErr));
     //calculate initial flows
     dim3 singleThread(config.singleXDim);
     printf(" grid %d  - %d \n", singleThread.x, singleThread.y);
-    single_calc<<<config.flowNum, singleThread>>>(config.singleYDim, gConf, gTop, gBox);
+    single_calc<<<config.flowNum, singleThread>>>(config.singleYDim, gConf[0], gTop[0], gBox);
     cudaDeviceSynchronize();
     cuErr = cudaGetLastError();
     printf("Cuda singlecalc last error: %s\n", cudaGetErrorString(cuErr));
@@ -73,8 +92,15 @@ int main (int argc, char * argv[]){
     plates_initial_state(config, doubleBox, hostData, initMol, deviceCount);
     //int double_box_init_allocate(options &config, hDoubleBox &doubleBox, int deviceCount);
     double_box_init_allocate(config, doubleBox, deviceCount);
-    //int double_box_host_to_device(options &config, hDoubleBox &doubleBox, gDoublebox gDBox, gDoublebox hDBox, gSingleBox &hostData, molecules* initMol, int deviceCount)
+    printf("double allocate done\n");
+    
+//    int double_box_host_to_device(options &config, hDoubleBox &doubleBox, gDoublebox gDBox, gDoublebox hDBox, gSingleBox &hostData, molecules* initMol, int deviceCount);
     double_box_host_to_device(config, doubleBox, gDBox, hDBox, hostData, initMol, deviceCount);
-    printf("%f - %f\n", hDBox.xa[0], hDBox.xm[0]);
+    printf("host to device done\n");
+    
+    double_equilibration(gDBox, doubleBox, gConf, gTop);
+    printf("equlibration done");
+    
+    //printf("%f - %f\n", hDBox.xa[0], hDBox.xm[0]);
     printf("Done\n");
 }

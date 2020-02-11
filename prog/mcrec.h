@@ -229,8 +229,8 @@ typedef struct{
     int* nLiq;  //number of liquid molecules
     int* nVap;  //number of vapor molecules
     
-    int* fMolOnPlate;   //index of first molecule on plate
-    int* fAtomOfMol;    //index of first atopm of molecule
+    int* fMolOnPlate;   //index of first molecule on plate [plates]
+    int* fAtomOfMol;    //index of first atopm of molecule [moleculas]
     
     int* aType; //atomtype
     
@@ -238,6 +238,12 @@ typedef struct{
     int* vapList;
     
     int* eqStep;    //nubers of step of equlibration on plate
+    
+    float* liqVol;  //volume of phases
+    float* vapVol;
+    
+    float* liqRcut; //cut radius of phases
+    float* vapRcut;
     
 } gDoublebox;
 
@@ -294,7 +300,7 @@ int freeAll(singleBox* &gpuSingleBox,singleBox* &initFlows,options config);
 int read_top(potentialParam* &allParams,int &lines);
 char* remove_space(char* input);
 int text_left(char* in, char* &out);
-int data_to_device(gSingleBox &gBox, singleBox* &inputData, gOptions &gConf, options &config, gMolecula &gTop, potentialParam* Param, molecules* initMol, gSingleBox &hostData, gMolecula &hostTop, gOptions &hostConf);
+int data_to_device(gSingleBox &gBox, singleBox* &inputData, gOptions* &gConf, options &config, gMolecula* &gTop, potentialParam* Param, molecules* initMol, gSingleBox &hostData, gMolecula &hostTop, gOptions &hostConf, int deviceCount);
 int rcut(gSingleBox &hostData, options config, gMolecula hostTop, molecules* &initMol, gOptions &hConf);
 
 
@@ -310,7 +316,9 @@ int write_singlebox_log(FILE* logFile, gSingleBox &hData);
 int plates_initial_state(options &config, hDoubleBox &doubleBox, gSingleBox &hostData, molecules* initMol, int deviceCount);
 int double_box_init_allocate(options &config, hDoubleBox &doubleBox, int deviceCount);
 
-int double_box_host_to_device(options &config, hDoubleBox &doubleBox, gDoublebox &gDBox, gDoublebox &hDBox, gSingleBox &hostData, molecules* initMol, int deviceCount);
+int double_box_host_to_device(options &config, hDoubleBox &doubleBox, gDoublebox* &gDBox, gDoublebox &hDBox, gSingleBox &hostData, molecules* initMol, int deviceCount);
+
+int double_equilibration(gDoublebox* &gDBox, hDoubleBox doubleBox, gOptions* gConf, gMolecula* gTop);
 
 //__global__ void 
 

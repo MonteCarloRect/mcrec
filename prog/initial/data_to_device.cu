@@ -1,6 +1,6 @@
 #include "../mcrec.h"
 
-int data_to_device(gSingleBox &gBox, singleBox* &inputData, gOptions &gConf, options &config, gMolecula &gTop, potentialParam* Param, molecules* initMol, gSingleBox &hostData, gMolecula &hostTop, gOptions &hostConf){
+int data_to_device(gSingleBox &gBox, singleBox* &inputData, gOptions* &gConf, options &config, gMolecula* &gTop, potentialParam* Param, molecules* initMol, gSingleBox &hostData, gMolecula &hostTop, gOptions &hostConf, int deviceCount){
     //allocate and copy data to GPU
     //gSingleBox hostData;
     int sum;
@@ -477,39 +477,57 @@ int data_to_device(gSingleBox &gBox, singleBox* &inputData, gOptions &gConf, opt
     }
 //    printf("OLOLO5\n");
     //gpu data
-    cuErr = cudaMalloc(&gTop.sigma, config.potNum * config.potNum * sizeof(float));
-    if(cuErr != cudaSuccess){
-        printf("Cannot allocate top.sigma memory file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+    for(int curDev = 0; curDev < deviceCount; curDev++){
+        cuErr = cudaMalloc(&gTop[curDev].sigma, config.potNum * config.potNum * sizeof(float));
+        if(cuErr != cudaSuccess){
+            printf("Cannot allocate top[curDev].sigma memory file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
+        cuErr = cudaMalloc(&gTop[curDev].epsi, config.potNum * config.potNum * sizeof(float));
+        if(cuErr != cudaSuccess){
+            printf("Cannot allocate top[curDev].epsilon memory file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
+        cuErr = cudaMalloc(&gTop[curDev].charge, config.potNum * config.potNum * sizeof(float));
+        if(cuErr != cudaSuccess){
+            printf("Cannot allocate top[curDev].charge memory file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
+        cuErr = cudaMalloc(&gTop[curDev].aNum, config.subNum * sizeof(int));
+        if(cuErr != cudaSuccess){
+            printf("Cannot allocate top[curDev].aNum memory file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
+        cuErr = cudaMemcpy(gTop[curDev].sigma, hostTop.sigma, config.potNum * config.potNum * sizeof(float), cudaMemcpyHostToDevice);
+        if(cuErr != cudaSuccess){
+            printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
+        cuErr = cudaMemcpy(gTop[curDev].epsi, hostTop.epsi, config.potNum * config.potNum * sizeof(float), cudaMemcpyHostToDevice);
+        if(cuErr != cudaSuccess){
+            printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
+        cuErr = cudaMemcpy(gTop[curDev].charge, hostTop.charge, config.potNum * config.potNum * sizeof(float), cudaMemcpyHostToDevice);
+        if(cuErr != cudaSuccess){
+            printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
+        cuErr = cudaMemcpy(gTop[curDev].aNum, hostTop.aNum, config.subNum * sizeof(int), cudaMemcpyHostToDevice);
+        if(cuErr != cudaSuccess){
+            printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
+        //set atom types
+        hostTop.aType = (int*) malloc(config.subNum * MAXATOM * sizeof(int));
+        cuErr = cudaMalloc(&gTop[curDev].aType, config.subNum * MAXATOM * sizeof(float));
+        if(cuErr != cudaSuccess){
+            printf("Cannot allocate top[curDev].aType memory file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
+        for(int i = 0; i < config.subNum; i++){
+            for(int j = 0; j < MAXATOM; j++){
+                if(j < initMol[i].atomNum){
+                    hostTop.aType[i * MAXATOM + j] = initMol[i].aType[j];
+                }
+                else{
+                    hostTop.aType[i * MAXATOM + j] = 0.0;
+                }
+                
+            }
+        }
     }
-    cuErr = cudaMalloc(&gTop.epsi, config.potNum * config.potNum * sizeof(float));
-    if(cuErr != cudaSuccess){
-        printf("Cannot allocate top.epsilon memory file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
-    }
-    cuErr = cudaMalloc(&gTop.charge, config.potNum * config.potNum * sizeof(float));
-    if(cuErr != cudaSuccess){
-        printf("Cannot allocate top.charge memory file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
-    }
-    cuErr = cudaMalloc(&gTop.aNum, config.subNum * sizeof(int));
-    if(cuErr != cudaSuccess){
-        printf("Cannot allocate top.aNum memory file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
-    }
-    cuErr = cudaMemcpy(gTop.sigma, hostTop.sigma, config.potNum * config.potNum * sizeof(float), cudaMemcpyHostToDevice);
-    if(cuErr != cudaSuccess){
-        printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
-    }
-    cuErr = cudaMemcpy(gTop.epsi, hostTop.epsi, config.potNum * config.potNum * sizeof(float), cudaMemcpyHostToDevice);
-    if(cuErr != cudaSuccess){
-        printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
-    }
-    cuErr = cudaMemcpy(gTop.charge, hostTop.charge, config.potNum * config.potNum * sizeof(float), cudaMemcpyHostToDevice);
-    if(cuErr != cudaSuccess){
-        printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
-    }
-    cuErr = cudaMemcpy(gTop.aNum, hostTop.aNum, config.subNum * sizeof(int), cudaMemcpyHostToDevice);
-    if(cuErr != cudaSuccess){
-        printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
-    }
-    
     //============================CONFIG
     hostConf.Temp=(float*) malloc(config.flowNum*sizeof(float));
     hostConf.potNum=(int*) malloc(sizeof(int));
@@ -518,21 +536,23 @@ int data_to_device(gSingleBox &gBox, singleBox* &inputData, gOptions &gConf, opt
     }
     hostConf.potNum[0]=config.potNum;   //to arrays
     printf("hostconf %d \n", hostConf.potNum[0]);
-    cuErr = cudaMalloc(&gConf.Temp, config.flowNum*sizeof(float));
-    if(cuErr != cudaSuccess){
-        printf("Cannot allocate gConf.Temp memory file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
-    }
-    cuErr = cudaMemcpy(gConf.Temp, hostConf.Temp, config.flowNum*sizeof(float), cudaMemcpyHostToDevice);
-    if(cuErr != cudaSuccess){
-        printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
-    }
-    cuErr = cudaMalloc(&gConf.potNum, sizeof(int));
-    if(cuErr != cudaSuccess){
-        printf("Cannot allocate gConf.potNum memory file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
-    }
-    cuErr = cudaMemcpy(gConf.potNum, hostConf.potNum, sizeof(int), cudaMemcpyHostToDevice);
-    if(cuErr != cudaSuccess){
-        printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+    for(int curDev = 0; curDev < deviceCount; curDev++){
+        cuErr = cudaMalloc(&gConf[curDev].Temp, config.flowNum*sizeof(float));
+        if(cuErr != cudaSuccess){
+            printf("Cannot allocate gConf[curDev].Temp memory file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
+        cuErr = cudaMemcpy(gConf[curDev].Temp, hostConf.Temp, config.flowNum*sizeof(float), cudaMemcpyHostToDevice);
+        if(cuErr != cudaSuccess){
+            printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
+        cuErr = cudaMalloc(&gConf[curDev].potNum, sizeof(int));
+        if(cuErr != cudaSuccess){
+            printf("Cannot allocate gConf[curDev].potNum memory file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
+        cuErr = cudaMemcpy(gConf[curDev].potNum, hostConf.potNum, sizeof(int), cudaMemcpyHostToDevice);
+        if(cuErr != cudaSuccess){
+            printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
     }
     
     return 0;
