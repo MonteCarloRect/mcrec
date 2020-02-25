@@ -10,6 +10,9 @@
 #include <stdlib.h>
 #include <math.h>
 
+/*#include <curand_kernel.h>*/
+/*#include <curand.h>*/
+
 //#include <curand_kernel.h>
 //#include <curand.h>
 
@@ -114,9 +117,12 @@ typedef struct{
     int* state; //1 -- liquid 2 -- vapor    //
     float* liqVol;    //volume of liquid box    //[plate number]
     float* vapVol;    //volume of vapor box     //[plate number]
+    float* temp;    //plate temperature
     
     float* refEnergy;   //reference energy of plate //[plate number]
     
+    float* liqRcut; //cut radius for phases
+    float* vapRcut;
     //float* liqEnergy;   //current energy of liquid phase
     
     float** xm; //[plate number][molecule number]
@@ -132,6 +138,8 @@ typedef struct{
         //[platenumber] [molecule index]
     int** vapList;  //list of vapor molecules per plate
         //[plate number] [molecule index]
+    
+    int** phaseType; //type of molecule phase [plate][molecule]
     
     float*** xa;    //atoms     //[plate number] [molecule id] [atom index]
     float*** ya;
@@ -211,10 +219,13 @@ typedef struct{
 
 
 typedef struct{
-    int* pltNum;    //total numbers of plate
+    int* pltNum;    //plates number for each devcice
+    int* fPlateNdx;   //first plate in each device
+    int* pltList;   //list of plates in devices
+    
 
     int* molNum;    //total numbers of molecules per plate
-    int* molNumType;    //total number of molecules by type per plate
+//    int* molNumType;    //total number of molecules by type per plate
     int* fMolNdx;   //first molecules index 
     
     float* xm;  //molecules coordinats
@@ -230,12 +241,14 @@ typedef struct{
     int* nVap;  //number of vapor molecules
     
     int* fMolOnPlate;   //index of first molecule on plate [plates]
-    int* fAtomOfMol;    //index of first atopm of molecule [moleculas]
+    int* fAtomOfMol;
+//    int* fAtomNdx;    //index of first atopm of molecule [moleculas]
     
     int* aType; //atomtype
     
     int* liqList;   //lists of molecules
     int* vapList;
+    int* phaseType;     //type of phase
     
     int* eqStep;    //nubers of step of equlibration on plate
     
@@ -244,6 +257,31 @@ typedef struct{
     
     float* liqRcut; //cut radius of phases
     float* vapRcut;
+    
+    float* liqEn;   //energy
+    float* vapEn;
+    float* refEn;
+    
+    float* liqVir;  //virial
+    float* vapVir;
+    
+    float* tempLiqEn;  //temp array for enegry
+    float* tempLiqVir;
+    float* tempVapEn;   //temp vapor energy
+    float* tempVapVir;
+    
+    cudaStream_t stream;    //streams
+    
+    float* temp;    //current plate temperature
+    
+    float* maxLiqTrans;    //maximum liquid transition
+    float* maxVapTrans;     //maximum vapor transition
+    
+    int* accLiqTrans;    //accept move in liquid phase
+    int* rejLiqTrans;
+    
+    int* accVapTrans;   //accept move in vapor phase
+    int* rejVapTrans;
     
 } gDoublebox;
 
@@ -300,7 +338,7 @@ int freeAll(singleBox* &gpuSingleBox,singleBox* &initFlows,options config);
 int read_top(potentialParam* &allParams,int &lines);
 char* remove_space(char* input);
 int text_left(char* in, char* &out);
-int data_to_device(gSingleBox &gBox, singleBox* &inputData, gOptions* &gConf, options &config, gMolecula* &gTop, potentialParam* Param, molecules* initMol, gSingleBox &hostData, gMolecula &hostTop, gOptions &hostConf, int deviceCount);
+int data_to_device(gSingleBox &gBox, singleBox* &inputData, gOptions* &gConf, options &config, gMolecula* &gTop, potentialParam* Param, molecules* initMol, gSingleBox &hostData, gMolecula &hostTop, gOptions &hostConf, int deviceCount, gDoublebox* &gDBox);
 int rcut(gSingleBox &hostData, options config, gMolecula hostTop, molecules* &initMol, gOptions &hConf);
 
 
@@ -318,9 +356,10 @@ int double_box_init_allocate(options &config, hDoubleBox &doubleBox, int deviceC
 
 int double_box_host_to_device(options &config, hDoubleBox &doubleBox, gDoublebox* &gDBox, gDoublebox &hDBox, gSingleBox &hostData, molecules* initMol, int deviceCount);
 
-int double_equilibration(gDoublebox* &gDBox, hDoubleBox doubleBox, gOptions* gConf, gMolecula* gTop);
+int double_equilibration(gDoublebox* gDBox, hDoubleBox doubleBox, gOptions* gConf, gMolecula* gTop);
 
 //__global__ void 
+
 
 #endif
 //

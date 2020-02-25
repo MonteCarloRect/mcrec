@@ -145,15 +145,19 @@ __global__ void single_calc(int yDim, gOptions gConf, gMolecula gTop, gSingleBox
         if(threadIdx.x == 0){
             printf("equlibrated %d\n", equlibrated);
         }
+        //block for prodaction
 //        tempBlock++;
 //        if(tempBlock > 6){
 //            equlibrated = true;
 //        }
+        
+        //block for debug
         equlibrated = true;
-    }
-    if(threadIdx.x == 0){
-            printf("test ololo %d\n", equlibrated);
+        if(threadIdx.x == 0){
+            gBox.avEnergy[blockIdx.x] = gBox.eqBlockEnergy[blockIdx.x];
         }
+    }
+    
     if(threadIdx.x==0){
         printf("energy %f virial %f\n", gBox.energy[blockIdx.x], gBox.virial[blockIdx.x]);
         printf("accepted %d rejected %d\n", gBox.accept[blockIdx.x], gBox.reject[blockIdx.x]);

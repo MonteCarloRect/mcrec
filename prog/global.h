@@ -8,12 +8,15 @@
 #define KB 1.38064852e10-23
 #define PI 3.14159265359
 #define MAXATOM 50
-#define EQBLOCKS 5  //numbers of block for equlibrium
-#define EQBLOCKSIZE 20000  //numbers of mc steps in equlibriem block
+#define EQBLOCKS 3  //numbers of block for equlibrium
+#define EQBLOCKSIZE 1000  //numbers of mc steps in equlibriem block
 #define EQBLOCKCHECK 20
 #define VAK 0   //initial state of plates
 #define GAS 1
 #define MAXDIM 512  //maximum dlock dimension
+
+#define LIQ 1   //phases
+#define VAP 0
 
 //color console
 #define ANSI_COLOR_RED     "\x1b[31m"
@@ -24,7 +27,7 @@
 #define ANSI_COLOR_CYAN    "\x1b[36m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
-
+#define MAXGPU  4   //maximum size of GPU
 
 #define LB 1   //Lorenz-Berthelot
 

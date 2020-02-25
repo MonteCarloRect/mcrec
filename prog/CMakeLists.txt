@@ -30,10 +30,13 @@ cuda_add_executable(
     initial/data_from_device.cu
     initial/rcut.cu
     write/single_box_write.cu
-    rect/double_box.cu
+#    rect/double_box.cu
     rect/dbox_init.cu
     rect/double_devtohost.cu
+    
     rect/double_step.cu
+    rect/double_trans.cu
+    
 )
 #set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -o3")
 #set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -lm")

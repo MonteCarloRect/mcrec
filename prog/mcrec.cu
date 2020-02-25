@@ -16,7 +16,7 @@ int main (int argc, char * argv[]){
     logFile=fopen("calculation.log","w");
     //
     get_device_prop(deviceCount, deviceProp);
-    if(deviceCount<1){
+    if(deviceCount< 1 ){
         printf("No CUDA device is detected\n");
         return 1;
     }
@@ -26,10 +26,14 @@ int main (int argc, char * argv[]){
 //    if(cuErr != cudaSuccess){
 //        printf("Cannot allocate gDBox %s line %d, err: %s, device %d\n", __FILE__, __LINE__, cudaGetErrorString(cuErr), deviceCount);
 //    }
-//    cuErr = cudaMalloc(&gConf, deviceCount * sizeof(gOptions));
-//    if(cuErr != cudaSuccess){
-//        printf("Cannot allocate gConf %s line %d, err: %s, device %d\n", __FILE__, __LINE__, cudaGetErrorString(cuErr), deviceCount);
+
+//    for(int i = 0; i < deviceCount; i++){
+//        cuErr = cudaMalloc((void**)&gConf, deviceCount * sizeof(gOptions));
+//        if(cuErr != cudaSuccess){
+//            printf("Cannot allocate gConf %s line %d, err: %s, device %d\n", __FILE__, __LINE__, cudaGetErrorString(cuErr), deviceCount);
+//        }
 //    }
+//    printf("test 16.02\n");
 //    cuErr = cudaMalloc(&gTop, deviceCount * sizeof(gMolecula));
 //    if(cuErr != cudaSuccess){
 //        printf("Cannot allocate gConf %s line %d, err: %s, device %d\n", __FILE__, __LINE__, cudaGetErrorString(cuErr), deviceCount);
@@ -55,13 +59,19 @@ int main (int argc, char * argv[]){
     //create initial simulation
     initial_flows(config, initFlows, initMol, gpuSingleBox, paramsLines, allParams, gpuParams, hostParams, gpuMixParams, hostMixParams, deviceProp);
     //copy data to GPU device
-    data_to_device(gBox, initFlows, gConf, config, gTop, hostParams, initMol, hostData, hostTop, hostConf, deviceCount);
+    data_to_device(gBox, initFlows, gConf, config, gTop, hostParams, initMol, hostData, hostTop, hostConf, deviceCount, gDBox);
     cuErr = cudaGetLastError();
     printf("Cuda data2device last error: %s\n", cudaGetErrorString(cuErr));
     //calculate initial flows
     dim3 singleThread(config.singleXDim);
     printf(" grid %d  - %d \n", singleThread.x, singleThread.y);
-    single_calc<<<config.flowNum, singleThread>>>(config.singleYDim, gConf[0], gTop[0], gBox);
+    
+    cuErr = cudaSetDevice(0);  //set to current device
+    if(cuErr != cudaSuccess){
+        printf("Cannot swtich to device %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+    }
+    single_calc<<<config.flowNum, singleThread,0, gDBox[0].stream>>>(config.singleYDim, gConf[0], gTop[0], gBox);
+    
     cudaDeviceSynchronize();
     cuErr = cudaGetLastError();
     printf("Cuda singlecalc last error: %s\n", cudaGetErrorString(cuErr));
@@ -72,6 +82,10 @@ int main (int argc, char * argv[]){
     //print out results
     write_singlebox_log(logFile, hostData);
     
+    //
+    for(int i = 0; i < config.flowNum; i++){
+        printf("flow %d avergae energy %f\n",i, hostData.avEnergy[i]);
+    }
     //Double box
     //initial inserting of molecules
     

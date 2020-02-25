@@ -14,7 +14,7 @@ plates_number = 6
 plates_init = vak
 plates_ins_number = 3
 plates_insertion = true
-plates_vol = 1.2    #nm-3
+plates_vol = 2000.0    #nm-3
 
 
 #initial state

@@ -40,6 +40,9 @@ if(config.plateInit == VAK){    //vakuum at all plates
     doubleBox.nLiq = (int*) malloc(config.plateNum * sizeof(int));
     doubleBox.liqList = (int**) malloc(config.plateNum * sizeof(int*));
     doubleBox.vapList = (int**) malloc(config.plateNum * sizeof(int*));
+    doubleBox.temp = (float*) malloc(config.plateNum * sizeof(float));
+    
+    doubleBox.phaseType = (int**) malloc(config.plateNum * sizeof(int*));
     
     doubleBox.xa = (float***) malloc(config.plateNum * sizeof(float**));
     doubleBox.ya = (float***) malloc(config.plateNum * sizeof(float**));
@@ -48,20 +51,26 @@ if(config.plateInit == VAK){    //vakuum at all plates
     doubleBox.refEnergy = (float*) malloc(config.plateNum * sizeof(float)); //referance energy of plate
     for(int i = 0; i < config.plateNum; i++){
         doubleBox.nVap[i] = 0; //initial molecules in vapor
-        doubleBox.nLiq[i] = 0;  //initial molecules in liquid 
+        doubleBox.nLiq[i] = 0;  //initial molecules in liquid
+        doubleBox.temp[i] = 0.0;    //initial temperature is zero
         doubleBox.molNum[i] = 0;    //if vak initial number is 0
         doubleBox.refEnergy[i] = 0.0;   //set energy of phases to zero
         //doubleBox.liqEnergy[i] = 0.0;
     }
-    printf("\n test 0 \n");
+    //printf("\n test 0 \n");
     for(int i = 0; i < config.flowNum; i++){
         for(int j = 0; j < config.subNum; j++){
             //set molecules in inputs of molecules
             doubleBox.molNum[config.plateIn[i]] = doubleBox.molNum[config.plateIn[i]] + config.flowIns[i][j];
             //set reference energy of plate
-            doubleBox.refEnergy[config.plateIn[i]] = doubleBox.refEnergy[config.plateIn[i]] + config.flowIns[i][j] * hostData.avEnergy[i];
+            doubleBox.refEnergy[config.plateIn[i]] += config.flowIns[i][j] * hostData.avEnergy[i];
+            printf("mol type %d insert %d energy %f\n", j, config.flowIns[i][j],  hostData.avEnergy[i]);
         }
-        doubleBox.nLiq[i] += doubleBox.molNum[i];   //all molecules goes to liquid phase
+        doubleBox.nLiq[config.plateIn[i]] += doubleBox.molNum[config.plateIn[i]];   //all molecules goes to liquid phase
+        doubleBox.temp[config.plateIn[i]] = config.flowT[i];
+    }
+    for(int i=0; i < config.plateNum; i++){
+        printf("plates %d molecules %d %d ref energy  %f init temperature %f \n", i, doubleBox.nLiq[i], doubleBox.nVap[i], doubleBox.refEnergy[i], doubleBox.temp[i]);
     }
     
     //set numbers of molecules
@@ -91,6 +100,8 @@ if(config.plateInit == VAK){    //vakuum at all plates
         doubleBox.vapList[i] = (int*) malloc(doubleBox.molNum[i] * sizeof(int) +1);
         doubleBox.liqList[i] = (int*) malloc(doubleBox.molNum[i] * sizeof(int) +1);
         
+        doubleBox.phaseType[i] = (int*) malloc(doubleBox.molNum[i] * sizeof(int) +1);
+        
         doubleBox.xa[i] = (float**) malloc(doubleBox.molNum[i] * sizeof(float*) + 1);
         doubleBox.ya[i] = (float**) malloc(doubleBox.molNum[i] * sizeof(float*) + 1);
         doubleBox.za[i] = (float**) malloc(doubleBox.molNum[i] * sizeof(float*) + 1);
@@ -98,8 +109,10 @@ if(config.plateInit == VAK){    //vakuum at all plates
     //allocate volumes of boxes
     doubleBox.liqVol = (float*) malloc(config.plateNum * sizeof(float));
     doubleBox.vapVol = (float*) malloc(config.plateNum * sizeof(float));
+    doubleBox.liqRcut = (float*) malloc(config.plateNum * sizeof(float));
+    doubleBox.vapRcut = (float*) malloc(config.plateNum * sizeof(float));
     //allocate type of atoms
-    printf("\n test 2 \n");
+    //printf("\n test 2 \n");
     doubleBox.type = (int**) malloc(config.plateNum * sizeof(int*));
     for(int i = 0; i < config.plateNum; i++){
         doubleBox.type[i] = (int*) malloc(doubleBox.molNum[i] * sizeof(int));
@@ -125,6 +138,10 @@ if(config.plateInit == VAK){    //vakuum at all plates
         //initial volume of gas and liqud phase
         doubleBox.liqVol[i] = volFrac * config.plateVol;
         doubleBox.vapVol[i] = config.plateVol - doubleBox.liqVol[i];
+        doubleBox.liqRcut[i] = pow(doubleBox.liqVol[i],1.0/3.0);
+        doubleBox.vapRcut[i] = pow(doubleBox.vapVol[i],1.0/3.0);
+        
+        latticeDelta = doubleBox.liqRcut[i] / latticeRow;
         
         id = 0;
         for(int ii = 0; ii < latticeRow; ii++){
@@ -134,6 +151,7 @@ if(config.plateInit == VAK){    //vakuum at all plates
                     tempXm[id] = (ii + 0.5) * latticeDelta;
                     tempYm[id] = (jj + 0.5) * latticeDelta;
                     tempZm[id] = (kk + 0.5) * latticeDelta;
+                    //printf(" %f temp x %f y %f z %f\n", latticeDelta, tempXm[id], tempYm[id] ,tempZm[id]);
                     id++;
                 }
             }
@@ -151,10 +169,12 @@ if(config.plateInit == VAK){    //vakuum at all plates
                     doubleBox.xm[i][id] = tempXm[randMol];  
                     doubleBox.ym[i][id] = tempYm[randMol];
                     doubleBox.zm[i][id] = tempZm[randMol];
+                    //printf("plate %d id %d x %f y %f z %f\n", i, id, doubleBox.xm[i][id], doubleBox.ym[i][id], doubleBox.zm[i][id]);
                     doubleBox.mType[i][id] = j; //set type of molecules
                     doubleBox.liqList[i][id] = id;  //set current molecule to liquid phase
-                    //doubleBox.nLiq[i]++;    //add one more molecule to liquid phase
-                    //doubleBox.nVap[i]++;    //summ molecules DO THIS UPPER
+                    doubleBox.phaseType[i][id] = LIQ;
+                    
+                    //printf("plate %d type  %d list %d \n", i, doubleBox.mType[i][id], doubleBox.liqList[i][id]);
                     
                     doubleBox.xa[i][id] = (float*) malloc(initMol[j].atomNum * sizeof(float));
                     doubleBox.ya[i][id] = (float*) malloc(initMol[j].atomNum * sizeof(float));
@@ -172,6 +192,7 @@ if(config.plateInit == VAK){    //vakuum at all plates
                 
             }
         }
+        
         free(tempXm);
         free(tempYm);
         free(tempZm);
