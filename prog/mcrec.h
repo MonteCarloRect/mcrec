@@ -270,6 +270,10 @@ typedef struct{
     float* tempVapEn;   //temp vapor energy
     float* tempVapVir;
     
+    float* tempXm;  //coordinates
+    float* tempYm;
+    float* tempZm;
+    
     cudaStream_t stream;    //streams
     
     float* temp;    //current plate temperature
@@ -277,11 +281,60 @@ typedef struct{
     float* maxLiqTrans;    //maximum liquid transition
     float* maxVapTrans;     //maximum vapor transition
     
+    float* maxVolChange;    //maximumum volume change
+    
     int* accLiqTrans;    //accept move in liquid phase
     int* rejLiqTrans;
     
     int* accVapTrans;   //accept move in vapor phase
     int* rejVapTrans;
+    
+    int* accVolChange;   //accept volume change
+    int* rejVolChange;
+    
+    int* accLiq2Vap;    //accept liquid to vapor phase
+    int* rejLiq2Vap;
+    int* accVap2Liq;
+    int* rejVap2Liq;
+    
+    //properties
+    float* sumLiqEn;    //energy
+    float* sumVapEn;
+    float* sumLiqMolEn; //energy per molecules
+    float* sumVapMolEn;
+    float* sumLiqMol;   //moleecule numbers
+    float* sumVapMol;
+    float* sumLiqConc;  //concentration
+    float* sumVapConc;
+    float* sumLiqPress; //pressure
+    float* sumVapPress;
+    float* sumLiqMassDens;  //density
+    float* sumVapMassDens;
+    
+    //
+    float* blockLiqEn;  //energy
+    float* blockVapEn;
+    float* blockLiqMolEn;   //energy per molecule
+    float* blockVapMolEn;
+    float* blockLiqMol; //molecule number
+    float* blockVapMol;
+    float* blockLiqConc;    //concentration
+    float* blockVapConc;
+    float* blockLiqPress;   //pressure
+    float* blockVapPress;
+    float* blockLiqMassDens;    //density
+    float* blockVapMassDens;
+    
+    float* avLiqEn; //energy
+    float* avVapEn;
+    float* avLiqMol;    //molecule numbers
+    float* avVapMol;
+    float* avLiqConc;   //concentration
+    float* avVapConc;
+    float* avLiqPress;  //pressure
+    float* avVapPress;
+    float* avLiqMassDens;   //density
+    float* avVapMassDens;
     
 } gDoublebox;
 
@@ -303,7 +356,7 @@ typedef struct{ //topology
 } gMolecula;
 
 typedef struct{ //config
-    int subNum;
+    int* subNum;
     int flowNum;
     int* potNum;
     float* Temp;

@@ -13,10 +13,10 @@
 #define EQBLOCKCHECK 20
 #define VAK 0   //initial state of plates
 #define GAS 1
-#define MAXDIM 512  //maximum dlock dimension
+#define MAXDIM 32  //maximum dlock dimension
 
 #define LIQ 1   //phases
-#define VAP 0
+#define VAP 2
 
 //color console
 #define ANSI_COLOR_RED     "\x1b[31m"

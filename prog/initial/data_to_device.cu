@@ -544,19 +544,29 @@ int data_to_device(gSingleBox &gBox, singleBox* &inputData, gOptions* &gConf, op
     //============================CONFIG
     hostConf.Temp=(float*) malloc(config.flowNum*sizeof(float));
     hostConf.potNum=(int*) malloc(sizeof(int));
+    hostConf.subNum=(int*) malloc(sizeof(int));
     for(int i=0; i<config.flowNum; i++){
         hostConf.Temp[i]=config.flowT[i];
     }
     hostConf.potNum[0]=config.potNum;   //to arrays
+    hostConf.subNum[0] = config.subNum; //to array
     printf("hostconf %d \n", hostConf.potNum[0]);
     for(int curDev = 0; curDev < deviceCount; curDev++){
         cuErr = cudaSetDevice(curDev);  //set to current device
         if(cuErr != cudaSuccess){
             printf("Cannot swtich to device %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
+        cuErr = cudaMalloc(&gConf[curDev].subNum, sizeof(int));
+        if(cuErr != cudaSuccess){
+            printf("Cannot allocate gConf[curDev].subNum memory file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
         cuErr = cudaMalloc(&gConf[curDev].Temp, config.flowNum*sizeof(float));
         if(cuErr != cudaSuccess){
             printf("Cannot allocate gConf[curDev].Temp memory file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
+        }
+        cuErr = cudaMemcpy(gConf[curDev].subNum, hostConf.subNum, sizeof(int), cudaMemcpyHostToDevice);
+        if(cuErr != cudaSuccess){
+            printf("Cannot copy memory to device file %s line %d, err: %s\n", __FILE__, __LINE__, cudaGetErrorString(cuErr));
         }
         cuErr = cudaMemcpy(gConf[curDev].Temp, hostConf.Temp, config.flowNum*sizeof(float), cudaMemcpyHostToDevice);
         if(cuErr != cudaSuccess){
