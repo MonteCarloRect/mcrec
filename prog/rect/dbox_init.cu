@@ -63,7 +63,7 @@ if(config.plateInit == VAK){    //vakuum at all plates
             //set molecules in inputs of molecules
             doubleBox.molNum[config.plateIn[i]] = doubleBox.molNum[config.plateIn[i]] + config.flowIns[i][j];
             //set reference energy of plate
-            doubleBox.refEnergy[config.plateIn[i]] += config.flowIns[i][j] * hostData.avEnergy[i];
+            doubleBox.refEnergy[config.plateIn[i]] += config.flowIns[i][j] * hostData.avEnergy[i] + 3.0/2.0 * config.flowIns[i][j] * config.flowT[i];
             printf("mol type %d insert %d energy %f\n", j, config.flowIns[i][j],  hostData.avEnergy[i]);
         }
         doubleBox.nLiq[config.plateIn[i]] += doubleBox.molNum[config.plateIn[i]];   //all molecules goes to liquid phase

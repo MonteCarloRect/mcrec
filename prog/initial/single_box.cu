@@ -45,7 +45,7 @@ __global__ void single_calc(int yDim, gOptions gConf, gMolecula gTop, gSingleBox
     //printf("deb 81 %d \n", gTop.aNum[0]);
     single_calc_totenergy(yDim, gConf, gTop, gBox);
     __syncthreads();
-    curand_init(1234, threadIdx.x, 0, &devStates);
+    curand_init(123, threadIdx.x, 0, &devStates);
     //loop for change molecules position
     
     //EQULIBRATION

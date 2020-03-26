@@ -8,8 +8,8 @@
 #define KB 1.38064852e10-23
 #define PI 3.14159265359
 #define MAXATOM 50
-#define EQBLOCKS 3  //numbers of block for equlibrium
-#define EQBLOCKSIZE 1000  //numbers of mc steps in equlibriem block
+#define EQBLOCKS 5  //numbers of block for equlibrium
+#define EQBLOCKSIZE 5000  //numbers of mc steps in equlibriem block
 #define EQBLOCKCHECK 20
 #define VAK 0   //initial state of plates
 #define GAS 1

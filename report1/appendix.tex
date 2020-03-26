@@ -26,6 +26,11 @@
 		\item read\_options.cu --- чтение параметров моделирования из файла 
 		\item single\_box.cu --- основной алгоритм метода Монте-Карло
 	\end{itemize}
+	\begin{itemize}
+		\item dbox\_init.cu --- вычисление начального состояния системы
+		\item double\_devtohost.cu --- подготовка данных и перенос данных на видеокарту
+		\item double\_step.cu --- ядро вычислений на видеокарте
+	\end{itemize}
 	\item write --- содержит файлы с выводом логов и выходных данных
 	\item CMakeLists.txt --- конфигурация для сборки Cmake
 	\item global.h --- глобальные константы

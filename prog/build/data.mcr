@@ -5,7 +5,7 @@ substance_files  =  A.gro	B.gro
 #material flow properties
 input_flows = 1
 input_ensamble = nvt
-input_temperature = 5.0
+input_temperature = 1.0
 input_density = 30.7616586686354
 input_ins_mol = 200 200
 

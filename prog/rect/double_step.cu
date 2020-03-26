@@ -186,8 +186,8 @@ __global__ void double_equilib_cycle(gDoublebox gDBox, gOptions gConf, gMolecula
             if(nblk % 10 == 0){
                 //printf("i %d second %d thread %d\n", nblk, blockIdx.x, threadIdx.x);
                 double_vol_change(gDBox, gConf, gTop, yDim, devStates);
-                double_liq_2_vap(gDBox, gConf, gTop, yDim, devStates);
             }
+            double_liq_2_vap(gDBox, gConf, gTop, yDim, devStates);
 //            if(threadIdx.x == 0){
 //                        printf("checked liquid en %f liqud vir %f\n", gDBox.liqEn[blockIdx.x], gDBox.liqVir[blockIdx.x]);
 //                    }
@@ -1128,7 +1128,7 @@ __device__ int double_check_equilibration(gDoublebox &gDBox, gOptions gConf, gMo
     float maxDens;
     float maxPres;
     
-    if((threadIdx.x == 0) && (curId > EQBLOCKS)){
+    if((threadIdx.x == 0) && (curId > EQBLOCKS*3)){
         //get average value
         gDBox.avLiqEn[blockIdx.x] = 0.0;
         gDBox.avVapEn[blockIdx.x] = 0.0;
@@ -1157,37 +1157,54 @@ __device__ int double_check_equilibration(gDoublebox &gDBox, gOptions gConf, gMo
         gDBox.avLiqMassDens[blockIdx.x] /= EQBLOCKS;
         gDBox.avVapMassDens[blockIdx.x] /= EQBLOCKS;
         
+        
         maxEn = 0.0;
-        maxPres = 0.0;
+        maxDens = 0.0;
         maxPres = 0.0;
         //check energy
         for(int i = 0; i < EQBLOCKS; i++){
-            if(maxEn < abs(gDBox.blockLiqEn[blockIdx.x * EQBLOCKS + i] - gDBox.avLiqEn[blockIdx.x]) / abs(gDBox.avLiqEn[blockIdx.x] )){
-                maxEn = abs(gDBox.blockLiqEn[blockIdx.x * EQBLOCKS + i] - gDBox.avLiqEn[blockIdx.x]) / abs(gDBox.avLiqEn[blockIdx.x]);
+            if(abs(gDBox.avLiqEn[blockIdx.x]) > 0){
+                if(maxEn < abs(gDBox.blockLiqEn[blockIdx.x * EQBLOCKS + i] - gDBox.avLiqEn[blockIdx.x]) / abs(gDBox.avLiqEn[blockIdx.x] )){
+                    maxEn = abs(gDBox.blockLiqEn[blockIdx.x * EQBLOCKS + i] - gDBox.avLiqEn[blockIdx.x]) / abs(gDBox.avLiqEn[blockIdx.x]);
+                }
             }
-            if(maxEn < abs(gDBox.blockVapEn[blockIdx.x * EQBLOCKS + i] - gDBox.avVapEn[blockIdx.x]) / abs(gDBox.avVapEn[blockIdx.x] )){
-                maxEn = abs(gDBox.blockVapEn[blockIdx.x * EQBLOCKS + i] - gDBox.avVapEn[blockIdx.x]) / abs(gDBox.avVapEn[blockIdx.x]);
+//            if(abs(gDBox.avVapEn[blockIdx.x]) > 0){
+//                if(maxEn < abs(gDBox.blockVapEn[blockIdx.x * EQBLOCKS + i] - gDBox.avVapEn[blockIdx.x]) / abs(gDBox.avVapEn[blockIdx.x] )){
+//                    maxEn = abs(gDBox.blockVapEn[blockIdx.x * EQBLOCKS + i] - gDBox.avVapEn[blockIdx.x]) / abs(gDBox.avVapEn[blockIdx.x]);
+//                }
+//            }
+            if(abs(gDBox.avLiqMassDens[blockIdx.x]) > 0){
+                if(maxDens < abs(gDBox.blockLiqMassDens[blockIdx.x * EQBLOCKS + i] - gDBox.avLiqMassDens[blockIdx.x]) / abs(gDBox.avLiqMassDens[blockIdx.x])){
+                    maxDens = abs(gDBox.blockLiqMassDens[blockIdx.x * EQBLOCKS + i] - gDBox.avLiqMassDens[blockIdx.x]) / abs(gDBox.avLiqMassDens[blockIdx.x]);
+                }
             }
-            if(maxDens < abs(gDBox.blockLiqMassDens[blockIdx.x * EQBLOCKS + i] - gDBox.avLiqMassDens[blockIdx.x]) / abs(gDBox.avLiqMassDens[blockIdx.x] )){
-                maxDens = abs(gDBox.blockLiqMassDens[blockIdx.x * EQBLOCKS + i] - gDBox.avLiqMassDens[blockIdx.x]) / abs(gDBox.avLiqMassDens[blockIdx.x]);
-            }
-            if(maxDens < abs(gDBox.blockVapMassDens[blockIdx.x * EQBLOCKS + i] - gDBox.avVapMassDens[blockIdx.x]) / abs(gDBox.avVapMassDens[blockIdx.x] )){
-                maxDens = abs(gDBox.blockVapMassDens[blockIdx.x * EQBLOCKS + i] - gDBox.avVapMassDens[blockIdx.x]) / abs(gDBox.avVapMassDens[blockIdx.x]);
-            }
-            if(maxPres < abs(gDBox.blockVapPress[blockIdx.x * EQBLOCKS + i] - gDBox.avVapPress[blockIdx.x]) / abs(gDBox.avVapPress[blockIdx.x] )){
-                maxPres = abs(gDBox.blockVapPress[blockIdx.x * EQBLOCKS + i] - gDBox.avVapPress[blockIdx.x]) / abs(gDBox.avVapPress[blockIdx.x]);
+//            if(abs(gDBox.avVapMassDens[blockIdx.x]) > 0){
+//                if(maxDens < abs(gDBox.blockVapMassDens[blockIdx.x * EQBLOCKS + i] - gDBox.avVapMassDens[blockIdx.x]) / abs(gDBox.avVapMassDens[blockIdx.x] )){
+//                    maxDens = abs(gDBox.blockVapMassDens[blockIdx.x * EQBLOCKS + i] - gDBox.avVapMassDens[blockIdx.x]) / abs(gDBox.avVapMassDens[blockIdx.x]);
+//                }
+//            }
+            if(abs(gDBox.avVapPress[blockIdx.x]) > 0){
+                if(maxPres < abs(gDBox.blockVapPress[blockIdx.x * EQBLOCKS + i] - gDBox.avVapPress[blockIdx.x]) / abs(gDBox.avVapPress[blockIdx.x] )){
+                    maxPres = abs(gDBox.blockVapPress[blockIdx.x * EQBLOCKS + i] - gDBox.avVapPress[blockIdx.x]) / abs(gDBox.avVapPress[blockIdx.x]);
+                }
             }
         }
-        if(maxEn > 0.05){
+        //printf
+        for(int i = 0; i < EQBLOCKS; i++){
+            printf("dens liq %f vap %f --%f %f\n", gDBox.blockLiqMassDens[blockIdx.x * EQBLOCKS + i], gDBox.blockVapMassDens[blockIdx.x * EQBLOCKS + i], gDBox.avLiqMassDens[blockIdx.x], gDBox.avVapMassDens[blockIdx.x]);
+        }
+        
+        if(maxEn > 0.02){
             printf("====energy not equlibrated %f\n", maxEn);
         }
-        if(maxDens > 0.05){
+        if(maxDens > 0.02){
             printf("====density not equlibrated %f\n", maxDens);
         }
-        if(maxPres > 0.05){
+        if(maxPres > 0.02){
             printf("====pressure not equlibrated %f\n", maxPres);
         }
-        if((maxEn < 0.05) && (maxDens < 0.05) && (maxPres < 0.05)){
+        if((maxEn < 0.01) && (maxDens < 0.002) && (maxPres < 0.02)){
+            printf("equlibrated En %f Dens %f Press %f\n", maxEn, maxDens, maxPres);
             gDBox.eqStep[blockIdx.x] = curId;
         }
     }
@@ -1196,6 +1213,7 @@ __device__ int double_check_equilibration(gDoublebox &gDBox, gOptions gConf, gMo
             printf("current block %d less %d\n", curId, EQBLOCKS);
         }
     }
+    __syncthreads();
     
     return 0;
 }

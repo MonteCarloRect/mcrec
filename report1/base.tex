@@ -45,7 +45,7 @@
 \usepackage{hyperref}
 \usepackage[russian,noabbrev]{cleveref}
 
-\graphicspath{{fig/}}
+\graphicspath{{fig/}{fig2/}}
 
 \usepackage{lastpage}
 \usepackage{fancyhdr}
@@ -76,7 +76,6 @@
 }
 \makeatother
 
-
 \usepackage{listings}
 \usepackage{color}
 
@@ -94,9 +93,12 @@
 \input{introduction.tex}
 \input{theory.tex}
 \input{prog.tex}
-\input{appendix.tex}
+\input{prog_double.tex}
+\input{condclusion.tex}
+
 %\newpage
 \addcontentsline{toc}{section}{\bibname}
 \bibliographystyle{utf8gost71u}  
 \bibliography{lib.bib}
+\input{appendix.tex}
 \end{document}
